@@ -12,11 +12,11 @@ fi
 
 echo "Removing Canon PIXMA G3010 Linux Tool..."
 
-$SUDO rm -f /usr/local/bin/canon-maintenance
+$SUDO rm -f /usr/local/bin/canon-maintenance /usr/local/bin/canon-g3010-maintenance
 $SUDO rm -f /usr/local/share/applications/canon-maintenance.desktop
 $SUDO rm -rf /usr/share/cmdtocanonij2
 
-rm -f "$HOME/.local/bin/canon-maintenance"
+rm -f "$HOME/.local/bin/canon-maintenance" "$HOME/.local/bin/canon-g3010-maintenance"
 rm -f "$HOME/.local/share/applications/canon-maintenance.desktop"
 
 read -rp "Do you also want to remove the CUPS printer queue 'Canon_G3010'? [y/N]: " del_queue
