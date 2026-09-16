@@ -197,13 +197,18 @@ sudo cp desktop/canon-g3010-maintenance.desktop /usr/local/share/applications/
 
 ## How to Use
 
-### 1. Interactive Terminal App
+### 1. Graphical User Interface (Default GUI)
+Launch the native GTK3 graphical assistant:
 ```bash
 canon-g3010-maintenance
 ```
+* Or press `SUPER + Space` and select **Canon PIXMA G3010 Assistant**.
 
-### 2. Application Launcher
-Press `SUPER + Space` (or your desktop application runner) and select **Canon PIXMA G3010 Maintenance**.
+### 2. Terminal TUI Mode (Headless / SSH)
+If you prefer running inside the terminal or over SSH:
+```bash
+canon-g3010-maintenance --cli
+```
 
 ### 3. Direct Command Line Invocations
 ```bash

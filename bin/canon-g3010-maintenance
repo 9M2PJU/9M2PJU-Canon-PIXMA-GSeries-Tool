@@ -1,359 +1,618 @@
-#!/usr/bin/env bash
-# ==============================================================================
-# Canon PIXMA G3010 Series Linux Assistant & Maintenance Suite
-# Author: 9M2PJU
-# Repository: https://github.com/9M2PJU/9M2PJU-Canon-PIXMA-G3010-Linux-Tool
-# ==============================================================================
+#!/usr/bin/env python3
+"""
+==============================================================================
+Canon PIXMA G3010 Series Linux Assistant & Maintenance Suite
+Author: 9M2PJU
+Repository: https://github.com/9M2PJU/9M2PJU-Canon-PIXMA-G3010-Linux-Tool
+License: GPL-3.0-or-later
+==============================================================================
+"""
 
-PRINTER="${CANON_PRINTER_NAME:-Canon_G3010}"
-PRINTER_IP="${CANON_PRINTER_IP:-169.254.108.236}"
-UTL_DIR="/usr/share/cmdtocanonij2"
-
-# Fallback to local data dir if system utl dir not found
-if [ ! -d "$UTL_DIR" ]; then
-    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-    if [ -d "$SCRIPT_DIR/data/cmdtocanonij2" ]; then
-        UTL_DIR="$SCRIPT_DIR/data/cmdtocanonij2"
-    fi
-fi
-
-wait_for_idle() {
-    local max_wait="${1:-30}"
-    local count=0
-    echo -n "   Waiting for printer to process and return to idle"
-    while [ $count -lt "$max_wait" ]; do
-        local status
-        status=$(lpstat -p "$PRINTER" 2>&1)
-        if echo "$status" | grep -qi "is idle"; then
-            echo " [OK]"
-            return 0
-        fi
-        echo -n "."
-        sleep 2
-        count=$((count + 2))
-    done
-    echo " [Done]"
-}
-
-countdown() {
-    local seconds=$1
-    local msg="$2"
-    while [ "$seconds" -gt 0 ]; do
-        printf "\r   %s (%02ds remaining)..." "$msg" "$seconds"
-        sleep 1
-        seconds=$((seconds - 1))
-    done
-    printf "\r   %s [Finished]            \n" "$msg"
-}
-
-run_continuous_routine() {
-    clear
-    echo "=================================================================="
-    echo "   Canon PIXMA G3010 - All-In-One Continuous Maintenance Routine"
-    echo "=================================================================="
-    echo "This automated routine will run maintenance steps sequentially:"
-    echo "  1. Initial Nozzle Check (Baseline test)"
-    echo "  2. Print Head Cleaning (Nozzle purge cycle)"
-    echo "  3. Verification Nozzle Check (Post-cleaning comparison)"
-    echo "  4. Print Head Auto-Alignment Sheet"
-    echo "  5. Guided Mechanical Clean (Rollers & Bottom Plate)"
-    echo "=================================================================="
-    echo ""
-    echo "⚠️  Ensure plain A4 paper is loaded in the rear tray before starting."
-    read -rp "Start continuous routine now? [Y/n]: " start_choice
-    if [[ "$start_choice" =~ ^[nN] ]]; then
-        return
-    fi
-
-    # Step 0: Check connectivity
-    echo ""
-    echo "==> [0/5] Checking printer connection ($PRINTER_IP)..."
-    if ! ping -c 1 -W 2 "$PRINTER_IP" >/dev/null 2>&1; then
-        echo "❌ Error: Cannot reach printer at $PRINTER_IP."
-        echo "   Please make sure the printer is powered on and connected to Wi-Fi."
-        read -rp "Press Enter to return..."
-        return
-    fi
-    echo "    Printer is online and reachable."
-
-    # Step 1: Initial Nozzle Check
-    echo ""
-    echo "==> [1/5] Step 1: Printing Initial Baseline Nozzle Check Pattern..."
-    lp -d "$PRINTER" "$UTL_DIR/nozzlecheck.utl"
-    sleep 3
-    wait_for_idle 40
-    echo "    Initial Nozzle Check pattern printed."
-    echo "    Inspect the printout for any broken lines or missing color grids."
-    echo ""
-    read -rp "Press Enter to proceed to Print Head Cleaning (or Ctrl+C to abort)..."
-
-    # Step 2: Head Cleaning
-    echo ""
-    echo "==> [2/5] Step 2: Executing Print Head Cleaning Cycle..."
-    lp -d "$PRINTER" "$UTL_DIR/cleaning.utl"
-    sleep 3
-    countdown 60 "Cleaning print heads & purging nozzles"
-    wait_for_idle 30
-    echo "    Print head cleaning cycle complete."
-    echo ""
-    read -rp "Press Enter to proceed to Verification Nozzle Check..."
-
-    # Step 3: Verification Nozzle Check
-    echo ""
-    echo "==> [3/5] Step 3: Printing Post-Cleaning Verification Nozzle Check..."
-    lp -d "$PRINTER" "$UTL_DIR/nozzlecheck.utl"
-    sleep 3
-    wait_for_idle 40
-    echo "    Verification pattern printed."
-    echo "    Compare this sheet with the first one to confirm nozzle improvement."
-    echo ""
-
-    # Step 4: Head Alignment
-    read -rp "Proceed to Step 4: Print Head Auto-Alignment? [Y/n]: " align_choice
-    if [[ ! "$align_choice" =~ ^[nN] ]]; then
-        echo ""
-        echo "==> [4/5] Step 4: Printing Print Head Auto-Alignment Sheet..."
-        lp -d "$PRINTER" "$UTL_DIR/autoalign.utl"
-        sleep 3
-        wait_for_idle 45
-        echo "    Alignment sheet printed."
-        echo "    To complete alignment calibration:"
-        echo "      1. Place the alignment sheet face-down on the scanner glass."
-        echo "      2. Press [Setup / 🔧] on the printer until '5' appears on the LCD."
-        echo "      3. Press the [Color] or [Black] button."
-        echo ""
-        read -rp "Press Enter when done with alignment calibration..."
-    else
-        echo "    Skipping Print Head Alignment."
-    fi
-
-    # Step 5: Mechanical Cleaning Guide
-    echo ""
-    read -rp "Proceed to Step 5: Guided Roller & Bottom Plate Cleaning? [y/N]: " mech_choice
-    if [[ "$mech_choice" =~ ^[yY] ]]; then
-        clear
-        echo "=================================================================="
-        echo "==> [5/5] Step 5: Paper Feed Roller & Bottom Plate Cleaning"
-        echo "=================================================================="
-        echo " Part A: Paper Feed Roller Cleaning:"
-        echo "   1. Remove all paper from the rear tray."
-        echo "   2. Press [Setup / 🔧] until '6' appears on LCD."
-        echo "   3. Press [Black] or [Color] (rollers rotate 3 times without paper)."
-        echo "   4. Load 3 sheets of plain A4 paper."
-        echo "   5. Press [Black] or [Color] again to feed through and wipe rollers."
-        echo ""
-        echo " Part B: Bottom Plate Cleaning (Prevents ink smudges on back of paper):"
-        echo "   1. Take 1 sheet of A4 paper, fold in half widthwise, then unfold."
-        echo "   2. Load in rear tray with the open/creased side facing you."
-        echo "   3. Press [Setup / 🔧] until '7' appears on LCD."
-        echo "   4. Press [Black] or [Color] to clean bottom plate ribs."
-        echo "=================================================================="
-        echo ""
-        read -rp "Press Enter to finish routine..."
-    fi
-
-    echo ""
-    echo "=================================================================="
-    echo " 🎉 All-In-One Maintenance Routine Complete!"
-    echo "=================================================================="
-    read -rp "Press Enter to return to main menu..."
-}
-
-show_menu() {
-    clear
-    echo "=================================================================="
-    echo "    Canon PIXMA G3010 - Assistant & Maintenance Utility"
-    echo "=================================================================="
-    echo " ⭐ 0) ALL-IN-ONE CONTINUOUS ROUTINE (Runs 1 to 5 sequentially)"
-    echo "------------------------------------------------------------------"
-    echo " [Print Head & Ink Maintenance]"
-    echo "  1) Nozzle Check Pattern           (Checks for clogged nozzles)"
-    echo "  2) Cleaning                       (Standard print head cleaning)"
-    echo "  3) Deep Cleaning                  (Cleans stubborn clogs)"
-    echo "  4) Ink Flush                      (Purges tubes & fills heads)"
-    echo "  5) Print Head Alignment           (Corrects misalignment & lines)"
-    echo "  6) Remaining Ink Levels & Reset   (Live IPP check & reset guide)"
-    echo ""
-    echo " [Paper & Mechanical Cleaning]"
-    echo "  7) Roller Cleaning                (Cleans paper feed rollers)"
-    echo "  8) Bottom Plate Cleaning          (Cleans interior paper smudges)"
-    echo ""
-    echo " [Device Management & Settings]"
-    echo "  9) Printer Web Remote UI          (Quiet mode, Auto-power, Ink stats)"
-    echo " 10) CUPS Printer Status            (http://localhost:631)"
-    echo " 11) Complete Hardware Codes Reference"
-    echo "  q) Quit"
-    echo "=================================================================="
-    read -rp "Select an option [0-11, q]: " choice
-}
-
-while true; do
-    show_menu
-    case "$choice" in
-        0)
-            run_continuous_routine
-            ;;
-        1)
-            echo ""
-            echo ">> Sending Nozzle Check Pattern to $PRINTER..."
-            lp -d "$PRINTER" "$UTL_DIR/nozzlecheck.utl"
-            echo ">> Pattern sent. Verify lines and grid patterns on the printout."
-            read -rp "Press Enter to continue..."
-            ;;
-        2)
-            echo ""
-            echo ">> Initiating Print Head Cleaning on $PRINTER..."
-            lp -d "$PRINTER" "$UTL_DIR/cleaning.utl"
-            echo ">> Cleaning started. Please wait ~1-2 minutes until power light is solid."
-            read -rp "Press Enter to continue..."
-            ;;
-        3)
-            clear
-            echo "=================================================================="
-            echo "                DEEP PRINT HEAD CLEANING"
-            echo "=================================================================="
-            echo "Deep cleaning consumes more ink than standard cleaning."
-            echo "To perform Deep Cleaning directly on the Canon G3010:"
-            echo ""
-            echo "  1. Make sure the printer is turned ON and loaded with paper."
-            echo "  2. Press the [Setup / 🔧] button repeatedly until '3' is displayed on the LCD."
-            echo "  3. Press the [Black] or [Color] start button."
-            echo "  4. Wait ~2-3 minutes until the power lamp stops flashing."
-            echo "=================================================================="
-            read -rp "Press Enter to return to menu..."
-            ;;
-        4)
-            clear
-            echo "=================================================================="
-            echo "                  INK FLUSH (SYSTEM CLEANING)"
-            echo "=================================================================="
-            echo "Ink Flush forces ink through the delivery tubes into the print head."
-            echo "⚠️  CAUTION: Consumes a large amount of ink! Check tank levels first."
-            echo ""
-            echo "  1. Verify all ink tanks are at least 50% full."
-            echo "  2. Press the [Setup / 🔧] button repeatedly until '10' is displayed on the LCD."
-            echo "  3. Press the [Black] or [Color] start button."
-            echo "  4. The ink flush takes approximately 10 minutes to complete."
-            echo "=================================================================="
-            read -rp "Press Enter to return to menu..."
-            ;;
-        5)
-            echo ""
-            echo ">> Sending Print Head Auto-Alignment to $PRINTER..."
-            lp -d "$PRINTER" "$UTL_DIR/autoalign.utl"
-            echo ""
-            echo ">> Alignment sheet printing. For manual scanning alignment:"
-            echo "   1. Place printed alignment sheet face down on the scanner glass."
-            echo "   2. Press [Setup / 🔧] until '5' appears on the LCD, then press [Black] or [Color]."
-            read -rp "Press Enter to continue..."
-            ;;
-        6)
-            clear
-            echo "=================================================================="
-            echo "                  REMAINING INK LEVELS & STATUS"
-            echo "=================================================================="
-            echo ""
-            echo " [1] Digital Estimated Ink Levels (IPP Query):"
-            python3 -c "
+import sys
+import os
 import subprocess
-try:
-    out = subprocess.check_output(['ipptool', '-tv', 'ipp://$PRINTER_IP:631/ipp/print', 'get-printer-attributes.test'], text=True, timeout=5)
-    names, levels = [], []
-    for line in out.splitlines():
-        if 'marker-names' in line and '=' in line:
-            names = [x.strip() for x in line.split('=')[1].split(',')]
-        if 'marker-levels' in line and '=' in line:
-            levels = [int(x.strip()) for x in line.split('=')[1].split(',')]
-    color_map = {'BK': 'Black (BK)  ', 'C': 'Cyan (C)    ', 'M': 'Magenta (M) ', 'Y': 'Yellow (Y)  '}
-    for n, l in zip(names, levels):
-        label = color_map.get(n, n)
-        bar = '█' * (l // 5) + '░' * ((100 - l) // 5)
-        print(f'     {label}: [{bar}] {l}%')
-except Exception as e:
-    print('     (Could not query digital marker levels: ' + str(e) + ')')
-"
-            echo ""
-            echo " [2] Physical Visual Check (Primary & Most Accurate):"
-            echo "   • Check the front transparent ink tank windows on the printer:"
-            echo "       Left side  : Black ink tank (BK)"
-            echo "       Right side : Color ink tanks (C, M, Y)"
-            echo "   • Upper Line = Full capacity."
-            echo "   • Lower Dot (●) = Minimum safe level. (Refill before it drops below!)"
-            echo ""
-            echo " [3] Reset Remaining Ink Level Count (After refilling to upper line):"
-            echo "   • Quick Reset : Press & hold the [Stop] button (red triangle) for 5s."
-            echo "   • Setup Menu  : Press [Setup / 🔧] until '8' appears & press [Black]/[Color]."
-            echo "=================================================================="
-            read -rp "Press Enter to return to menu..."
-            ;;
-        7)
-            clear
-            echo "=================================================================="
-            echo "                       ROLLER CLEANING"
-            echo "=================================================================="
-            echo "Cleans paper feed rollers if paper is not feeding smoothly or slipping:"
-            echo ""
-            echo "  1. Remove all paper from the rear tray."
-            echo "  2. Press [Setup / 🔧] until '6' appears on the LCD."
-            echo "  3. Press [Black] or [Color] button (rollers will spin 3 times)."
-            echo "  4. Load 3 sheets of A4 plain paper into the rear tray."
-            echo "  5. Press [Black] or [Color] again to feed the paper through and clean."
-            echo "=================================================================="
-            read -rp "Press Enter to return to menu..."
-            ;;
-        8)
-            clear
-            echo "=================================================================="
-            echo "                    BOTTOM PLATE CLEANING"
-            echo "=================================================================="
-            echo "Cleans the printer interior to prevent smudges on the back of paper:"
-            echo ""
-            echo "  1. Take one sheet of A4 plain paper, fold it in half widthwise, then unfold."
-            echo "  2. Load it in the rear tray with the open side facing you."
-            echo "  3. Press [Setup / 🔧] until '7' appears on the LCD."
-            echo "  4. Press [Black] or [Color] button (paper will feed and clean interior)."
-            echo "=================================================================="
-            read -rp "Press Enter to return to menu..."
-            ;;
-        9)
-            echo ""
-            echo ">> Opening printer web interface: http://$PRINTER_IP"
-            xdg-open "http://$PRINTER_IP" 2>/dev/null || google-chrome-stable "http://$PRINTER_IP" &
-            read -rp "Press Enter to continue..."
-            ;;
-        10)
-            echo ""
-            echo ">> Opening CUPS status interface: http://localhost:631/printers/$PRINTER"
-            xdg-open "http://localhost:631/printers/$PRINTER" 2>/dev/null || google-chrome-stable "http://localhost:631/printers/$PRINTER" &
-            read -rp "Press Enter to continue..."
-            ;;
-        11)
-            clear
-            echo "=================================================================="
-            echo "       CANON PIXMA G3010 - ALL HARDWARE CODES REFERENCE"
-            echo "=================================================================="
-            echo "  Press [Setup / 🔧] button until number is on LCD, then [Black]/[Color]:"
-            echo ""
-            echo "  Code 1   : Nozzle Check Pattern"
-            echo "  Code 2   : Standard Print Head Cleaning"
-            echo "  Code 3   : Deep Print Head Cleaning"
-            echo "  Code 4   : Print Head Alignment Pattern Sheet"
-            echo "  Code 5   : Scan Alignment Sheet (Alignment calibration)"
-            echo "  Code 6   : Paper Feed Roller Cleaning"
-            echo "  Code 7   : Bottom Plate Interior Cleaning"
-            echo "  Code 8   : Remaining Ink Counter Reset"
-            echo "  Code 10  : Ink Flush (Full ink purge/recharge)"
-            echo "  Code 11  : Print Wireless LAN Details / Network Configuration"
-            echo "=================================================================="
-            read -rp "Press Enter to return to menu..."
-            ;;
-        q|Q)
-            echo "Exiting."
-            exit 0
-            ;;
-        *)
-            echo "Invalid selection."
-            sleep 1
-            ;;
-    esac
-done
+import threading
+import time
+import shutil
+
+PRINTER = os.environ.get("CANON_PRINTER_NAME", "Canon_G3010")
+PRINTER_IP = os.environ.get("CANON_PRINTER_IP", "169.254.108.236")
+PRINTER_WEB_URL = f"http://{PRINTER_IP}"
+CUPS_WEB_URL = f"http://localhost:631/printers/{PRINTER}"
+
+def get_utl_path(filename):
+    for candidate in [
+        f"/usr/share/cmdtocanonij2/{filename}",
+        f"/usr/share/cmdtocanonij3/{filename}",
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "cmdtocanonij2", filename),
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "cmdtocanonij2", filename)
+    ]:
+        if os.path.exists(candidate):
+            return candidate
+    return filename
+
+def query_ink_levels():
+    """Queries IPP marker levels and returns dict with percentages."""
+    try:
+        cmd = ["ipptool", "-tv", f"ipp://{PRINTER_IP}:631/ipp/print", "get-printer-attributes.test"]
+        res = subprocess.run(cmd, capture_output=True, text=True, timeout=4)
+        names, levels = [], []
+        for line in res.stdout.splitlines():
+            if "marker-names" in line and "=" in line:
+                names = [x.strip() for x in line.split("=")[1].split(",")]
+            if "marker-levels" in line and "=" in line:
+                levels = [int(x.strip()) for x in line.split("=")[1].split(",")]
+        if names and levels:
+            return dict(zip(names, levels))
+    except Exception:
+        pass
+    return {"BK": 100, "C": 100, "M": 100, "Y": 100}
+
+def is_printer_idle():
+    try:
+        res = subprocess.run(["lpstat", "-p", PRINTER], capture_output=True, text=True, timeout=3)
+        return "is idle" in res.stdout
+    except Exception:
+        return True
+
+def send_lp_command(utl_file):
+    path = get_utl_path(utl_file)
+    subprocess.run(["lp", "-d", PRINTER, path], check=False)
+
+
+# ==============================================================================
+# GTK3 Graphical User Interface (GUI)
+# ==============================================================================
+def run_gtk_gui():
+    import gi
+    gi.require_version('Gtk', '3.0')
+    from gi.repository import Gtk, Gdk, GLib
+
+    css_provider = Gtk.CssProvider()
+    css = b"""
+    .title-label { font-size: 16px; font-weight: bold; }
+    .subtitle-label { color: #888888; font-size: 11px; }
+    .card-box { background: alpha(@theme_base_color, 0.05); border: 1px solid alpha(@theme_fg_color, 0.15); border-radius: 8px; padding: 12px; }
+    .ink-bk progress { background-color: #2b2b2b; }
+    .ink-c progress { background-color: #00bcd4; }
+    .ink-m progress { background-color: #e91e63; }
+    .ink-y progress { background-color: #ffeb3b; }
+    .primary-btn { font-weight: bold; padding: 8px; }
+    .action-btn { padding: 6px 12px; }
+    """
+    css_provider.load_from_data(css)
+    Gtk.StyleContext.add_provider_for_screen(
+        Gdk.Screen.get_default(), css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+    )
+
+    class CanonAssistantWindow(Gtk.Window):
+        def __init__(self):
+            super().__init__(title="Canon PIXMA G3010 Assistant")
+            self.set_default_size(680, 720)
+            self.set_position(Gtk.WindowPosition.CENTER)
+            self.set_border_width(14)
+
+            # HeaderBar
+            hb = Gtk.HeaderBar()
+            hb.set_show_close_button(True)
+            hb.props.title = "Canon PIXMA G3010 Assistant"
+            hb.props.subtitle = f"{PRINTER} • {PRINTER_IP}"
+            self.set_titlebar(hb)
+
+            refresh_btn = Gtk.Button.new_from_icon_name("view-refresh-symbolic", Gtk.IconSize.BUTTON)
+            refresh_btn.set_tooltip_text("Refresh Ink Levels & Status")
+            refresh_btn.connect("clicked", lambda x: self.update_ink_bars())
+            hb.pack_end(refresh_btn)
+
+            # Main vertical container
+            main_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=14)
+            self.add(main_vbox)
+
+            # ------------------------------------------------------------------
+            # Section 1: Live Ink Level Status Card
+            # ------------------------------------------------------------------
+            ink_card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+            ink_card.get_style_context().add_class("card-box")
+
+            ink_header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+            ink_title = Gtk.Label(label="Remaining Ink Levels (Estimated IPP)")
+            ink_title.get_style_context().add_class("title-label")
+            ink_title.set_xalign(0)
+            ink_header.pack_start(ink_title, True, True, 0)
+            ink_card.pack_start(ink_header, False, False, 0)
+
+            ink_sub = Gtk.Label(label="⚠️ Visual inspection through front transparent windows is primary for MegaTank G-series.")
+            ink_sub.get_style_context().add_class("subtitle-label")
+            ink_sub.set_xalign(0)
+            ink_card.pack_start(ink_sub, False, False, 0)
+
+            # Ink bars grid
+            self.ink_grid = Gtk.Grid()
+            self.ink_grid.set_column_spacing(16)
+            self.ink_grid.set_row_spacing(6)
+            self.ink_grid.set_hexpand(True)
+
+            self.bars = {}
+            self.labels = {}
+            colors = [
+                ("BK", "Black (BK)", "ink-bk", 0),
+                ("C", "Cyan (C)", "ink-c", 1),
+                ("M", "Magenta (M)", "ink-m", 2),
+                ("Y", "Yellow (Y)", "ink-y", 3)
+            ]
+
+            for key, name, css_class, col in colors:
+                vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
+                lbl = Gtk.Label(label=f"<b>{name}</b>")
+                lbl.set_use_markup(True)
+                pbar = Gtk.ProgressBar()
+                pbar.get_style_context().add_class(css_class)
+                pbar.set_fraction(1.0)
+                pbar.set_show_text(True)
+                pbar.set_text("100%")
+                vbox.pack_start(lbl, False, False, 0)
+                vbox.pack_start(pbar, False, False, 0)
+                self.ink_grid.attach(vbox, col, 0, 1, 1)
+                self.bars[key] = pbar
+
+            ink_card.pack_start(self.ink_grid, False, False, 4)
+            main_vbox.pack_start(ink_card, False, False, 0)
+
+            # ------------------------------------------------------------------
+            # Section 2: One-Click All-In-One Routine
+            # ------------------------------------------------------------------
+            aio_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+            aio_box.get_style_context().add_class("card-box")
+
+            aio_btn = Gtk.Button(label="⭐ Run All-In-One Continuous Maintenance Routine")
+            aio_btn.get_style_context().add_class("primary-btn")
+            aio_btn.get_style_context().add_class("suggested-action")
+            aio_btn.connect("clicked", self.on_start_continuous_routine)
+            aio_box.pack_start(aio_btn, False, False, 0)
+
+            aio_desc = Gtk.Label(label="Sequentially executes: Baseline Nozzle Check ➔ 60s Purge Cleaning ➔ Verification Check ➔ Alignment Calibration.")
+            aio_desc.get_style_context().add_class("subtitle-label")
+            aio_desc.set_xalign(0.5)
+            aio_box.pack_start(aio_desc, False, False, 0)
+            main_vbox.pack_start(aio_box, False, False, 0)
+
+            # ------------------------------------------------------------------
+            # Section 3: Individual Maintenance Actions
+            # ------------------------------------------------------------------
+            actions_frame = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+            actions_frame.get_style_context().add_class("card-box")
+
+            sec_title = Gtk.Label(label="Individual Maintenance Tools")
+            sec_title.get_style_context().add_class("title-label")
+            sec_title.set_xalign(0)
+            actions_frame.pack_start(sec_title, False, False, 0)
+
+            actions_grid = Gtk.Grid()
+            actions_grid.set_column_spacing(10)
+            actions_grid.set_row_spacing(10)
+            actions_grid.set_column_homogeneous(True)
+
+            # Button 1: Nozzle Check
+            btn_nc = Gtk.Button(label="🔍 Nozzle Check Pattern")
+            btn_nc.set_tooltip_text("Prints nozzle test grid to detect missing colors or clogged jets")
+            btn_nc.connect("clicked", lambda x: self.run_simple_action("nozzlecheck.utl", "Printing Nozzle Check Pattern..."))
+            actions_grid.attach(btn_nc, 0, 0, 1, 1)
+
+            # Button 2: Standard Cleaning
+            btn_cl = Gtk.Button(label="🧼 Print Head Cleaning")
+            btn_cl.set_tooltip_text("Initiates standard head cleaning cycle (~60s)")
+            btn_cl.connect("clicked", self.on_cleaning_clicked)
+            actions_grid.attach(btn_cl, 1, 0, 1, 1)
+
+            # Button 3: Deep Cleaning
+            btn_dc = Gtk.Button(label="🔬 Deep Cleaning")
+            btn_dc.set_tooltip_text("Heavy duty cleaning for stubborn clogs")
+            btn_dc.connect("clicked", self.show_deep_cleaning_dialog)
+            actions_grid.attach(btn_dc, 0, 1, 1, 1)
+
+            # Button 4: Ink Flush
+            btn_flush = Gtk.Button(label="🌊 Ink Flush (Purge)")
+            btn_flush.set_tooltip_text("Purges and refills ink tubes (Caution: High ink consumption)")
+            btn_flush.connect("clicked", self.show_ink_flush_dialog)
+            actions_grid.attach(btn_flush, 1, 1, 1, 1)
+
+            # Button 5: Print Head Alignment
+            btn_align = Gtk.Button(label="📐 Print Head Alignment")
+            btn_align.set_tooltip_text("Prints alignment sheet and guides optical calibration")
+            btn_align.connect("clicked", self.on_alignment_clicked)
+            actions_grid.attach(btn_align, 0, 2, 1, 1)
+
+            # Button 6: Roller Cleaning
+            btn_roller = Gtk.Button(label="🧻 Paper Feed Roller Clean")
+            btn_roller.set_tooltip_text("Removes paper dust from rubber feed rollers")
+            btn_roller.connect("clicked", self.show_roller_dialog)
+            actions_grid.attach(btn_roller, 1, 2, 1, 1)
+
+            # Button 7: Bottom Plate Cleaning
+            btn_plate = Gtk.Button(label="📄 Bottom Plate Cleaning")
+            btn_plate.set_tooltip_text("Prevents paper smudges on the back of sheets")
+            btn_plate.connect("clicked", self.show_bottom_plate_dialog)
+            actions_grid.attach(btn_plate, 0, 3, 1, 1)
+
+            # Button 8: Ink Counter Reset
+            btn_reset = Gtk.Button(label="🔄 Reset Ink Counter")
+            btn_reset.set_tooltip_text("Instructions for resetting software ink level count after refilling")
+            btn_reset.connect("clicked", self.show_ink_reset_dialog)
+            actions_grid.attach(btn_reset, 1, 3, 1, 1)
+
+            actions_frame.pack_start(actions_grid, True, True, 0)
+            main_vbox.pack_start(actions_frame, True, True, 0)
+
+            # ------------------------------------------------------------------
+            # Section 4: Web Management & Hardware Reference
+            # ------------------------------------------------------------------
+            bottom_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+
+            btn_web = Gtk.Button(label="🌐 Open Web Remote UI")
+            btn_web.connect("clicked", lambda x: subprocess.Popen(["xdg-open", PRINTER_WEB_URL]))
+            bottom_box.pack_start(btn_web, True, True, 0)
+
+            btn_cups = Gtk.Button(label="🖨️ CUPS Spooler")
+            btn_cups.connect("clicked", lambda x: subprocess.Popen(["xdg-open", CUPS_WEB_URL]))
+            bottom_box.pack_start(btn_cups, True, True, 0)
+
+            btn_hw = Gtk.Button(label="📖 LCD Codes Guide")
+            btn_hw.connect("clicked", self.show_hardware_codes_dialog)
+            bottom_box.pack_start(btn_hw, True, True, 0)
+
+            main_vbox.pack_start(bottom_box, False, False, 0)
+
+            # Initial ink level load in background
+            threading.Thread(target=self.update_ink_bars, daemon=True).start()
+
+        def update_ink_bars(self):
+            levels = query_ink_levels()
+            def apply():
+                for k, v in levels.items():
+                    if k in self.bars:
+                        frac = max(0.0, min(1.0, v / 100.0))
+                        self.bars[k].set_fraction(frac)
+                        self.bars[k].set_text(f"{v}%")
+            GLib.idle_add(apply)
+
+        def run_simple_action(self, utl, title):
+            send_lp_command(utl)
+            dialog = Gtk.MessageDialog(
+                transient_for=self,
+                flags=0,
+                message_type=Gtk.MessageType.INFO,
+                buttons=Gtk.ButtonsType.OK,
+                text=title
+            )
+            dialog.format_secondary_text(f"Command sent to printer '{PRINTER}'. Please check your printer output.")
+            dialog.run()
+            dialog.destroy()
+
+        def on_cleaning_clicked(self, widget):
+            dialog = Gtk.MessageDialog(
+                transient_for=self,
+                flags=0,
+                message_type=Gtk.MessageType.QUESTION,
+                buttons=Gtk.ButtonsType.YES_NO,
+                text="Start Standard Print Head Cleaning?"
+            )
+            dialog.format_secondary_text("This will purge nozzles to clear lines and fainted prints. The cleaning cycle takes approximately 60 seconds.")
+            res = dialog.run()
+            dialog.destroy()
+            if res == Gtk.ResponseType.YES:
+                send_lp_command("cleaning.utl")
+                self.show_progress_timer("Cleaning Print Heads", "Executing nozzle purge cycle...", 60)
+
+        def show_progress_timer(self, title, subtitle, seconds):
+            p_diag = Gtk.Dialog(title=title, transient_for=self, flags=Gtk.DialogFlags.MODAL)
+            p_diag.set_default_size(360, 140)
+            vbox = p_diag.get_content_area()
+            vbox.set_spacing(10)
+            vbox.set_border_width(14)
+
+            lbl = Gtk.Label(label=f"<b>{title}</b>")
+            lbl.set_use_markup(True)
+            sub_lbl = Gtk.Label(label=subtitle)
+            pbar = Gtk.ProgressBar()
+            pbar.set_show_text(True)
+
+            vbox.pack_start(lbl, False, False, 0)
+            vbox.pack_start(sub_lbl, False, False, 0)
+            vbox.pack_start(pbar, False, False, 0)
+            p_diag.show_all()
+
+            def run_timer():
+                for i in range(seconds, -1, -1):
+                    frac = (seconds - i) / float(seconds)
+                    GLib.idle_add(pbar.set_fraction, frac)
+                    GLib.idle_add(pbar.set_text, f"{i}s remaining")
+                    time.sleep(1)
+                GLib.idle_add(p_diag.response, Gtk.ResponseType.OK)
+
+            threading.Thread(target=run_timer, daemon=True).start()
+            p_diag.run()
+            p_diag.destroy()
+
+        def on_start_continuous_routine(self, widget):
+            diag = Gtk.MessageDialog(
+                transient_for=self,
+                flags=0,
+                message_type=Gtk.MessageType.QUESTION,
+                buttons=Gtk.ButtonsType.YES_NO,
+                text="Start All-In-One Continuous Maintenance Routine?"
+            )
+            diag.format_secondary_text(
+                "This automated routine will sequentially:\n"
+                "1. Print baseline Nozzle Check pattern\n"
+                "2. Perform 60s Print Head Cleaning purge\n"
+                "3. Print verification Nozzle Check pattern\n"
+                "4. Print Head Auto-Alignment calibration sheet\n\n"
+                "Ensure 3–4 sheets of plain A4 paper are loaded in the rear tray."
+            )
+            res = diag.run()
+            diag.destroy()
+
+            if res == Gtk.ResponseType.YES:
+                # Step 1: Nozzle check
+                send_lp_command("nozzlecheck.utl")
+                self.show_step_dialog("Step 1 of 4: Initial Nozzle Check", "Printing baseline pattern sheet. Check the printed grid lines.", "Proceed to Cleaning")
+
+                # Step 2: Head Cleaning with progress bar
+                send_lp_command("cleaning.utl")
+                self.show_progress_timer("Step 2 of 4: Head Cleaning", "Cleaning print heads & purging nozzles...", 60)
+
+                # Step 3: Post-cleaning Nozzle Check
+                send_lp_command("nozzlecheck.utl")
+                self.show_step_dialog("Step 3 of 4: Verification Check", "Printing verification pattern. Compare with the first sheet to verify nozzle improvement.", "Proceed to Alignment")
+
+                # Step 4: Auto-Alignment
+                send_lp_command("autoalign.utl")
+                self.show_info_dialog(
+                    "Step 4 of 4: Print Head Alignment",
+                    "Alignment sheet is printing.\n\n"
+                    "To complete optical calibration:\n"
+                    "1. Place the printed sheet face-down on the scanner glass.\n"
+                    "2. Press the [Setup / 🔧] button on the printer until '5' appears on the LCD.\n"
+                    "3. Press the [Color] or [Black] button."
+                )
+
+        def show_step_dialog(self, title, msg, btn_text):
+            d = Gtk.MessageDialog(
+                transient_for=self,
+                flags=Gtk.DialogFlags.MODAL,
+                message_type=Gtk.MessageType.INFO,
+                buttons=Gtk.ButtonsType.NONE,
+                text=title
+            )
+            d.format_secondary_text(msg)
+            d.add_button(btn_text, Gtk.ResponseType.OK)
+            d.run()
+            d.destroy()
+
+        def show_info_dialog(self, title, msg):
+            d = Gtk.MessageDialog(
+                transient_for=self,
+                flags=Gtk.DialogFlags.MODAL,
+                message_type=Gtk.MessageType.INFO,
+                buttons=Gtk.ButtonsType.OK,
+                text=title
+            )
+            d.format_secondary_text(msg)
+            d.run()
+            d.destroy()
+
+        def show_deep_cleaning_dialog(self, widget):
+            self.show_info_dialog(
+                "Deep Print Head Cleaning Guide",
+                "Deep Cleaning consumes more ink than standard cleaning.\n\n"
+                "To execute Deep Cleaning directly on the printer:\n"
+                "1. Make sure paper is loaded and power is ON.\n"
+                "2. Press the [Setup / 🔧] button until '3' is displayed on the LCD.\n"
+                "3. Press the [Color] or [Black] start button.\n"
+                "4. Wait ~2–3 minutes until the power lamp stops flashing."
+            )
+
+        def show_ink_flush_dialog(self, widget):
+            self.show_info_dialog(
+                "Ink Flush (System Cleaning) Guide",
+                "⚠️ CAUTION: Consumes a large volume of ink!\n\n"
+                "Critical Pre-Check: All ink tanks MUST be at least 50% full (above the single dot '●' mark).\n\n"
+                "To execute Ink Flush on the printer:\n"
+                "1. Press the [Setup / 🔧] button until '10' appears on the LCD.\n"
+                "2. Press the [Color] or [Black] start button.\n"
+                "3. The ink flush cycle takes approximately 10 minutes."
+            )
+
+        def on_alignment_clicked(self, widget):
+            send_lp_command("autoalign.utl")
+            self.show_info_dialog(
+                "Print Head Auto-Alignment Sheet Sent",
+                "The alignment sheet is currently printing.\n\n"
+                "To calibrate print head sensors:\n"
+                "1. Place the alignment sheet face-down on the scanner glass.\n"
+                "2. Press the [Setup / 🔧] button until '5' appears on the LCD.\n"
+                "3. Press the [Color] or [Black] button."
+            )
+
+        def show_roller_dialog(self, widget):
+            self.show_info_dialog(
+                "Paper Feed Roller Cleaning Guide",
+                "Cleans rubber feed rollers when paper slips or fails to feed:\n\n"
+                "1. Remove all paper from the rear tray.\n"
+                "2. Press [Setup / 🔧] until '6' appears on the LCD.\n"
+                "3. Press [Color] or [Black] (rollers spin dry 3 times).\n"
+                "4. Load 3 sheets of plain A4 paper.\n"
+                "5. Press [Color] or [Black] again to feed paper through and wipe rollers."
+            )
+
+        def show_bottom_plate_dialog(self, widget):
+            self.show_info_dialog(
+                "Bottom Plate Cleaning Guide",
+                "Cleans internal rib plates to eliminate smudges on the back of paper:\n\n"
+                "1. Fold one sheet of A4 plain paper in half widthwise, then unfold.\n"
+                "2. Load into rear tray with the open/creased side facing you.\n"
+                "3. Press [Setup / 🔧] until '7' appears on the LCD.\n"
+                "4. Press [Color] or [Black] to feed the sheet through."
+            )
+
+        def show_ink_reset_dialog(self, widget):
+            self.show_info_dialog(
+                "Remaining Ink Counter Reset",
+                "When you refill ink tanks to the upper line, reset the internal counter:\n\n"
+                "• Quick Reset: Press and hold the [Stop] button (red triangle) for 5 seconds.\n\n"
+                "• Setup Menu: Press [Setup / 🔧] until '8' appears on the LCD, then press [Black] (for Black tank) or [Color] (for Color tanks)."
+            )
+
+        def show_hardware_codes_dialog(self, widget):
+            self.show_info_dialog(
+                "Canon PIXMA G3010 - Hardware Codes Reference",
+                "Press [Setup / 🔧] until the code appears on the LCD, then press [Black] or [Color]:\n\n"
+                "  Code 1   : Nozzle Check Pattern\n"
+                "  Code 2   : Standard Head Cleaning\n"
+                "  Code 3   : Deep Head Cleaning\n"
+                "  Code 4   : Print Alignment Pattern Sheet\n"
+                "  Code 5   : Scan Alignment Sheet (Calibration)\n"
+                "  Code 6   : Paper Feed Roller Cleaning\n"
+                "  Code 7   : Bottom Plate Cleaning\n"
+                "  Code 8   : Remaining Ink Counter Reset\n"
+                "  Code 10  : Ink Flush (Full ink purge/recharge)\n"
+                "  Code 11  : Print Wireless LAN Configuration Sheet"
+            )
+
+    win = CanonAssistantWindow()
+    win.connect("destroy", Gtk.main_quit)
+    win.show_all()
+    Gtk.main()
+
+
+# ==============================================================================
+# Terminal User Interface (CLI / TUI Fallback)
+# ==============================================================================
+def run_cli_tui():
+    utl_dir = "/usr/share/cmdtocanonij2"
+    if not os.path.exists(utl_dir):
+        utl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "cmdtocanonij2")
+
+    def wait_for_idle_cli(max_wait=30):
+        print("   Waiting for printer to process and return to idle", end="", flush=True)
+        for _ in range(0, max_wait, 2):
+            if is_printer_idle():
+                print(" [OK]")
+                return
+            print(".", end="", flush=True)
+            time.sleep(2)
+        print(" [Done]")
+
+    def countdown_cli(seconds, msg):
+        for s in range(seconds, 0, -1):
+            sys.stdout.write(f"\r   {msg} ({s:02d}s remaining)...")
+            sys.stdout.flush()
+            time.sleep(1)
+        sys.stdout.write(f"\r   {msg} [Finished]            \n")
+        sys.stdout.flush()
+
+    while True:
+        os.system("clear" if os.name == "posix" else "cls")
+        print("==================================================================")
+        print("    Canon PIXMA G3010 - Assistant & Maintenance Suite")
+        print("==================================================================")
+        print(" ⭐ 0) ALL-IN-ONE CONTINUOUS ROUTINE (Runs 1 to 5 sequentially)")
+        print("------------------------------------------------------------------")
+        print(" [Print Head & Ink Maintenance]")
+        print("  1) Nozzle Check Pattern           (Checks for clogged nozzles)")
+        print("  2) Cleaning                       (Standard print head cleaning)")
+        print("  3) Deep Cleaning                  (Cleans stubborn clogs)")
+        print("  4) Ink Flush                      (Purges tubes & fills heads)")
+        print("  5) Print Head Alignment           (Corrects misalignment & lines)")
+        print("  6) Remaining Ink Levels & Reset   (Live IPP check & reset guide)")
+        print("")
+        print(" [Paper & Mechanical Cleaning]")
+        print("  7) Roller Cleaning                (Cleans paper feed rollers)")
+        print("  8) Bottom Plate Cleaning          (Cleans interior paper smudges)")
+        print("")
+        print(" [Device Management & Settings]")
+        print("  9) Printer Web Remote UI          (Quiet mode, Auto-power, Ink stats)")
+        print(" 10) CUPS Printer Status            (http://localhost:631)")
+        print(" 11) Complete Hardware Codes Reference")
+        print("  q) Quit")
+        print("==================================================================")
+        choice = input("Select an option [0-11, q]: ").strip()
+
+        if choice == "0":
+            print("\n==> [1/4] Printing Baseline Nozzle Check...")
+            send_lp_command("nozzlecheck.utl")
+            wait_for_idle_cli(30)
+            input("Press Enter to proceed to Head Cleaning...")
+            print("\n==> [2/4] Executing Head Cleaning...")
+            send_lp_command("cleaning.utl")
+            countdown_cli(60, "Purging nozzles")
+            input("Press Enter to proceed to Verification Check...")
+            print("\n==> [3/4] Printing Verification Nozzle Check...")
+            send_lp_command("nozzlecheck.utl")
+            wait_for_idle_cli(30)
+            input("Press Enter to proceed to Alignment...")
+            print("\n==> [4/4] Printing Alignment Sheet...")
+            send_lp_command("autoalign.utl")
+            print("Alignment sheet sent. Place face-down on glass and press 🔧 until Code 5 appears.")
+            input("Press Enter to return to menu...")
+        elif choice == "1":
+            print(f"\n>> Sending Nozzle Check to {PRINTER}...")
+            send_lp_command("nozzlecheck.utl")
+            input("Done. Press Enter to continue...")
+        elif choice == "2":
+            print(f"\n>> Sending Head Cleaning to {PRINTER}...")
+            send_lp_command("cleaning.utl")
+            countdown_cli(60, "Cleaning print heads")
+            input("Done. Press Enter to continue...")
+        elif choice == "3":
+            print("\nDeep Cleaning Guide: Press [Setup / 🔧] until Code 3 appears, then press [Black] or [Color].")
+            input("Press Enter to return...")
+        elif choice == "4":
+            print("\nInk Flush Guide: Ensure tanks >= 50%. Press [Setup / 🔧] until Code 10 appears, then press [Color].")
+            input("Press Enter to return...")
+        elif choice == "5":
+            send_lp_command("autoalign.utl")
+            print("\nAlignment sheet sent. Put on glass & press [Setup / 🔧] until Code 5 appears.")
+            input("Press Enter to return...")
+        elif choice == "6":
+            print("\n--- LIVE IPP INK STATUS ---")
+            levels = query_ink_levels()
+            color_map = {'BK': 'Black (BK)  ', 'C': 'Cyan (C)    ', 'M': 'Magenta (M) ', 'Y': 'Yellow (Y)  '}
+            for k, v in levels.items():
+                label = color_map.get(k, k)
+                bar = '█' * (v // 5) + '░' * ((100 - v) // 5)
+                print(f"  {label}: [{bar}] {v}%")
+            print("\nReset ink counter after refill: Hold [Stop] button for 5s.")
+            input("Press Enter to return...")
+        elif choice == "7":
+            print("\nRoller Cleaning: Empty tray -> Press 🔧 until Code 6 -> Press Color -> Load 3 sheets -> Press Color.")
+            input("Press Enter to return...")
+        elif choice == "8":
+            print("\nBottom Plate Cleaning: Fold 1 A4 sheet widthwise, unfold -> Load in tray -> Press 🔧 until Code 7 -> Press Color.")
+            input("Press Enter to return...")
+        elif choice == "9":
+            subprocess.Popen(["xdg-open", PRINTER_WEB_URL])
+        elif choice == "10":
+            subprocess.Popen(["xdg-open", CUPS_WEB_URL])
+        elif choice == "11":
+            print("\nHardware Codes: 1=NozzleCheck, 2=Clean, 3=DeepClean, 4=AlignSheet, 5=ScanAlign, 6=Rollers, 7=BottomPlate, 8=ResetInk, 10=Flush, 11=NetConfig")
+            input("Press Enter to return...")
+        elif choice.lower() == "q":
+            break
+
+
+# ==============================================================================
+# Main Entry Point
+# ==============================================================================
+if __name__ == "__main__":
+    force_cli = "--cli" in sys.argv or "--tui" in sys.argv
+    has_display = bool(os.environ.get("WAYLAND_DISPLAY") or os.environ.get("DISPLAY"))
+
+    if not force_cli and has_display:
+        try:
+            run_gtk_gui()
+        except Exception as e:
+            print(f"Notice: Could not launch GTK GUI ({e}). Falling back to Terminal TUI...\n")
+            run_cli_tui()
+    else:
+        run_cli_tui()

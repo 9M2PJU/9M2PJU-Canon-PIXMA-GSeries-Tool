@@ -1,9 +1,9 @@
 [Desktop Entry]
-Name=Canon PIXMA G3010 Maintenance
-Comment=Assistant & Maintenance Suite for Canon PIXMA G3010
-Exec=kitty --title "Canon PIXMA G3010 Maintenance" canon-g3010-maintenance
+Name=Canon PIXMA G3010 Assistant
+Comment=GUI Assistant & Maintenance Suite for Canon PIXMA G3010
+Exec=canon-g3010-maintenance
 Icon=printer
 Terminal=false
 Type=Application
-Categories=Utility;Printing;HardwareSettings;
-Keywords=printer;canon;pixma;g3010;ink;cleaning;nozzle;align;
+Categories=Utility;Printing;HardwareSettings;GTK;
+Keywords=printer;canon;pixma;g3010;ink;cleaning;nozzle;align;gui;

@@ -29,7 +29,7 @@ fi
 echo -e "\n${GREEN}[1/5] Checking and installing dependencies...${NC}"
 if [ -f /etc/arch-release ] || [ -f /etc/cachyos-release ]; then
     echo "    Detected Arch / CachyOS Linux."
-    $SUDO pacman -S --noconfirm --needed cups cups-filters gutenprint foomatic-db-gutenprint-ppds avahi nss-mdns python || true
+    $SUDO pacman -S --noconfirm --needed cups cups-filters gutenprint foomatic-db-gutenprint-ppds avahi nss-mdns python python-gobject gtk3 || true
     
     if ! pacman -Qi cnijfilter2-g3010 >/dev/null 2>&1; then
         echo "    Installing official cnijfilter2-g3010 driver via AUR..."
@@ -44,7 +44,7 @@ if [ -f /etc/arch-release ] || [ -f /etc/cachyos-release ]; then
 elif [ -f /etc/debian_version ]; then
     echo "    Detected Debian / Ubuntu Linux."
     $SUDO apt-get update
-    $SUDO apt-get install -y cups cups-filters printer-driver-gutenprint avahi-daemon python3
+    $SUDO apt-get install -y cups cups-filters printer-driver-gutenprint avahi-daemon python3 python3-gi gir1.2-gtk-3.0
 fi
 
 # 2. Compatibility Library Fix
