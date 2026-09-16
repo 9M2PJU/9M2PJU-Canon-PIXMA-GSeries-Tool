@@ -1,9 +1,9 @@
 [Desktop Entry]
-Name=Canon PIXMA G3010 Assistant
+Name=Canon PIXMA G3010 Tool
 Comment=GUI Assistant & Maintenance Suite for Canon PIXMA G3010
-Exec=canon-g3010-maintenance
+Exec=canon-pixma-g3010-tool
 Icon=printer
 Terminal=false
 Type=Application
 Categories=Utility;Printing;HardwareSettings;GTK;
-Keywords=printer;canon;pixma;g3010;ink;cleaning;nozzle;align;gui;
+Keywords=printer;canon;pixma;g3010;ink;cleaning;nozzle;align;gui;tool;

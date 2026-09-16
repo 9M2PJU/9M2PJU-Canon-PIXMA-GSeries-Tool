@@ -58,17 +58,17 @@ fi
 echo -e "\n${GREEN}[3/5] Installing maintenance suite and desktop integration...${NC}"
 $SUDO mkdir -p /usr/share/cmdtocanonij2 /usr/local/bin /usr/local/share/applications
 $SUDO cp -r "$SCRIPT_DIR/data/cmdtocanonij2/"*.utl /usr/share/cmdtocanonij2/
-$SUDO cp "$SCRIPT_DIR/bin/canon-g3010-maintenance" /usr/local/bin/canon-g3010-maintenance
-$SUDO chmod +x /usr/local/bin/canon-g3010-maintenance
-$SUDO cp "$SCRIPT_DIR/desktop/canon-g3010-maintenance.desktop" /usr/local/share/applications/
-$SUDO chmod 644 /usr/local/share/applications/canon-g3010-maintenance.desktop
+$SUDO cp "$SCRIPT_DIR/bin/canon-pixma-g3010-tool" /usr/local/bin/canon-pixma-g3010-tool
+$SUDO chmod +x /usr/local/bin/canon-pixma-g3010-tool
+$SUDO cp "$SCRIPT_DIR/desktop/canon-pixma-g3010-tool.desktop" /usr/local/share/applications/
+$SUDO chmod 644 /usr/local/share/applications/canon-pixma-g3010-tool.desktop
 
 # Also link into user ~/.local/bin if available
 if [ -d "$HOME/.local/bin" ]; then
-    ln -sf /usr/local/bin/canon-g3010-maintenance "$HOME/.local/bin/canon-g3010-maintenance"
+    ln -sf /usr/local/bin/canon-pixma-g3010-tool "$HOME/.local/bin/canon-pixma-g3010-tool"
 fi
 if [ -d "$HOME/.local/share/applications" ]; then
-    cp "$SCRIPT_DIR/desktop/canon-g3010-maintenance.desktop" "$HOME/.local/share/applications/" || true
+    cp "$SCRIPT_DIR/desktop/canon-pixma-g3010-tool.desktop" "$HOME/.local/share/applications/" || true
 fi
 
 # 4. Enable Services
@@ -108,6 +108,6 @@ $SUDO lpadmin -d "$PRINTER_NAME"
 echo -e "\n${BLUE}==================================================================${NC}"
 echo -e "${GREEN} ✅ Installation Complete!${NC}"
 echo -e " • Printer default set to: ${YELLOW}$PRINTER_NAME${NC}"
-echo -e " • Launch maintenance tool anytime by typing: ${YELLOW}canon-g3010-maintenance${NC}"
-echo -e " • Or search for ${YELLOW}'Canon PIXMA G3010 Maintenance'${NC} in your app launcher."
+echo -e " • Launch maintenance tool anytime by typing: ${YELLOW}canon-pixma-g3010-tool${NC}"
+echo -e " • Or search for ${YELLOW}'Canon PIXMA G3010 Tool'${NC} in your app launcher."
 echo -e "${BLUE}==================================================================${NC}"

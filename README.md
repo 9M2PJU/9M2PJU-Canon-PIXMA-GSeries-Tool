@@ -1,6 +1,6 @@
 # Canon PIXMA G3010 Linux Driver & Maintenance Suite 🖨️
 
-[![AUR package](https://img.shields.io/aur/version/canon-pixma-g3010-tools-git.svg)](https://aur.archlinux.org/packages/canon-pixma-g3010-tools-git)
+[![AUR package](https://img.shields.io/aur/version/canon-pixma-g3010-tool.svg)](https://aur.archlinux.org/packages/canon-pixma-g3010-tool)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 [![Platform: Linux](https://img.shields.io/badge/Platform-CachyOS%20%7C%20Arch%20%7C%20Ubuntu%20%7C%20Debian%20%7C%20Fedora-orange.svg)]()
 [![Author: 9M2PJU](https://img.shields.io/badge/Author-9M2PJU-green.svg)](https://github.com/9M2PJU)
@@ -46,7 +46,7 @@ This tool solves all three issues out of the box.
 ```
 ┌────────────────────────────────────────────────────────┐
 │              User / Desktop Application                │
-│ (canon-g3010-maintenance TUI | Rofi / App Launcher)    │
+│   (canon-pixma-g3010-tool GUI / CLI | App Launcher)    │
 └───────────┬────────────────────────────────┬───────────┘
             │                                │
             ▼                                ▼
@@ -131,16 +131,16 @@ This tool solves all three issues out of the box.
 
 ### Option A: Install from AUR (Arch / CachyOS / Manjaro)
 ```bash
-yay -S canon-pixma-g3010-tools-git
+yay -S canon-pixma-g3010-tool
 # or
-paru -S canon-pixma-g3010-tools-git
+paru -S canon-pixma-g3010-tool
 ```
 
 ### Option B: Automated Installer Script (All Distributions)
 ```bash
 git clone https://github.com/9M2PJU/9M2PJU-Canon-PIXMA-G3010-Linux-Tool.git
 cd 9M2PJU-Canon-PIXMA-G3010-Linux-Tool
-chmod +x install.sh bin/canon-g3010-maintenance
+chmod +x install.sh bin/canon-pixma-g3010-tool
 ./install.sh
 ```
 
@@ -155,13 +155,13 @@ If you prefer to configure the system manually:
 ### 1. Install Dependencies
 * **Arch Linux / CachyOS / Manjaro:**
   ```bash
-  sudo pacman -S cups cups-filters gutenprint foomatic-db-gutenprint-ppds avahi nss-mdns python
+  sudo pacman -S cups cups-filters gutenprint foomatic-db-gutenprint-ppds avahi nss-mdns python python-gobject gtk3
   yay -S cnijfilter2-g3010
   ```
 * **Debian / Ubuntu:**
   ```bash
   sudo apt update
-  sudo apt install cups cups-filters printer-driver-gutenprint avahi-daemon python3
+  sudo apt install cups cups-filters printer-driver-gutenprint avahi-daemon python3 python3-gi gir1.2-gtk-3.0
   ```
 
 ### 2. Fix Legacy Library Symlink
@@ -188,9 +188,9 @@ sudo lpadmin -d Canon_G3010
 ```bash
 sudo mkdir -p /usr/share/cmdtocanonij2
 sudo cp data/cmdtocanonij2/*.utl /usr/share/cmdtocanonij2/
-sudo cp bin/canon-g3010-maintenance /usr/local/bin/canon-g3010-maintenance
-sudo chmod +x /usr/local/bin/canon-g3010-maintenance
-sudo cp desktop/canon-g3010-maintenance.desktop /usr/local/share/applications/
+sudo cp bin/canon-pixma-g3010-tool /usr/local/bin/canon-pixma-g3010-tool
+sudo chmod +x /usr/local/bin/canon-pixma-g3010-tool
+sudo cp desktop/canon-pixma-g3010-tool.desktop /usr/local/share/applications/
 ```
 
 ---
@@ -200,14 +200,14 @@ sudo cp desktop/canon-g3010-maintenance.desktop /usr/local/share/applications/
 ### 1. Graphical User Interface (Default GUI)
 Launch the native GTK3 graphical assistant:
 ```bash
-canon-g3010-maintenance
+canon-pixma-g3010-tool
 ```
-* Or press `SUPER + Space` and select **Canon PIXMA G3010 Assistant**.
+* Or search for **Canon PIXMA G3010 Tool** in your desktop application launcher / Rofi / Wofi.
 
 ### 2. Terminal TUI Mode (Headless / SSH)
 If you prefer running inside the terminal or over SSH:
 ```bash
-canon-g3010-maintenance --cli
+canon-pixma-g3010-tool --cli
 ```
 
 ### 3. Direct Command Line Invocations

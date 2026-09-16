@@ -12,12 +12,12 @@ fi
 
 echo "Removing Canon PIXMA G3010 Linux Tool..."
 
-$SUDO rm -f /usr/local/bin/canon-g3010-maintenance /usr/local/bin/canon-maintenance
-$SUDO rm -f /usr/local/share/applications/canon-g3010-maintenance.desktop /usr/local/share/applications/canon-maintenance.desktop
+$SUDO rm -f /usr/local/bin/canon-pixma-g3010-tool /usr/local/bin/canon-g3010-maintenance /usr/local/bin/canon-maintenance
+$SUDO rm -f /usr/local/share/applications/canon-pixma-g3010-tool.desktop /usr/local/share/applications/canon-g3010-maintenance.desktop /usr/local/share/applications/canon-maintenance.desktop
 $SUDO rm -rf /usr/share/cmdtocanonij2
 
-rm -f "$HOME/.local/bin/canon-g3010-maintenance" "$HOME/.local/bin/canon-maintenance"
-rm -f "$HOME/.local/share/applications/canon-g3010-maintenance.desktop" "$HOME/.local/share/applications/canon-maintenance.desktop"
+rm -f "$HOME/.local/bin/canon-pixma-g3010-tool" "$HOME/.local/bin/canon-g3010-maintenance" "$HOME/.local/bin/canon-maintenance"
+rm -f "$HOME/.local/share/applications/canon-pixma-g3010-tool.desktop" "$HOME/.local/share/applications/canon-g3010-maintenance.desktop" "$HOME/.local/share/applications/canon-maintenance.desktop"
 
 read -rp "Do you also want to remove the CUPS printer queue 'Canon_G3010'? [y/N]: " del_queue
 if [[ "$del_queue" =~ ^[yY] ]]; then
