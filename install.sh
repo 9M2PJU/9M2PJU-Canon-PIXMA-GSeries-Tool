@@ -7,7 +7,7 @@
 
 set -e
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}" 2>/dev/null)" 2>/dev/null && pwd || echo "")"
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 YELLOW='\033[1;33m'
@@ -23,6 +23,29 @@ if [ "$EUID" -ne 0 ]; then
     SUDO="sudo"
 else
     SUDO=""
+fi
+
+# Ensure source files exist (handles 1-liner curl | bash execution)
+if [ -z "$SCRIPT_DIR" ] || [ ! -f "$SCRIPT_DIR/bin/canon-pixma-gseries-tool" ]; then
+    echo -e "\n${GREEN}[*] Remote 1-liner execution detected. Fetching repository files...${NC}"
+    TEMP_DIR=$(mktemp -d /tmp/canon-gseries-install.XXXXXX)
+    trap 'rm -rf "$TEMP_DIR"' EXIT
+    if command -v git >/dev/null 2>&1; then
+        git clone --depth 1 https://github.com/9M2PJU/9M2PJU-Canon-PIXMA-GSeries-Tool.git "$TEMP_DIR" 2>/dev/null || \
+        git clone --depth 1 https://github.com/9M2PJU/9M2PJU-Canon-PIXMA-G3010-Linux-Tool.git "$TEMP_DIR" 2>/dev/null || true
+    fi
+    if [ ! -f "$TEMP_DIR/bin/canon-pixma-gseries-tool" ]; then
+        mkdir -p "$TEMP_DIR/bin" "$TEMP_DIR/desktop" "$TEMP_DIR/data/cmdtocanonij2"
+        curl -fsSL "https://raw.githubusercontent.com/9M2PJU/9M2PJU-Canon-PIXMA-GSeries-Tool/main/bin/canon-pixma-gseries-tool" -o "$TEMP_DIR/bin/canon-pixma-gseries-tool" 2>/dev/null || \
+        curl -fsSL "https://raw.githubusercontent.com/9M2PJU/9M2PJU-Canon-PIXMA-G3010-Linux-Tool/main/bin/canon-pixma-gseries-tool" -o "$TEMP_DIR/bin/canon-pixma-gseries-tool"
+        curl -fsSL "https://raw.githubusercontent.com/9M2PJU/9M2PJU-Canon-PIXMA-GSeries-Tool/main/desktop/canon-pixma-gseries-tool.desktop" -o "$TEMP_DIR/desktop/canon-pixma-gseries-tool.desktop" 2>/dev/null || \
+        curl -fsSL "https://raw.githubusercontent.com/9M2PJU/9M2PJU-Canon-PIXMA-G3010-Linux-Tool/main/desktop/canon-pixma-gseries-tool.desktop" -o "$TEMP_DIR/desktop/canon-pixma-gseries-tool.desktop"
+        for f in autoalign.utl cleaning.utl nozzlecheck.utl; do
+            curl -fsSL "https://raw.githubusercontent.com/9M2PJU/9M2PJU-Canon-PIXMA-GSeries-Tool/main/data/cmdtocanonij2/$f" -o "$TEMP_DIR/data/cmdtocanonij2/$f" 2>/dev/null || \
+            curl -fsSL "https://raw.githubusercontent.com/9M2PJU/9M2PJU-Canon-PIXMA-G3010-Linux-Tool/main/data/cmdtocanonij2/$f" -o "$TEMP_DIR/data/cmdtocanonij2/$f"
+        done
+    fi
+    SCRIPT_DIR="$TEMP_DIR"
 fi
 
 # 1. Package Installation

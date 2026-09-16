@@ -162,14 +162,30 @@ The **Canon PIXMA G3000** (and G2000 / G1000) is the 1st generation predecessor 
 
 ## Quick Installation
 
-### Option A: Install from AUR (Arch / CachyOS / Manjaro)
+### Option A: ⚡ 1-Liner Automated Install (Recommended)
+Run directly in your terminal to install drivers, fix compatibility libraries, configure link-local network routing, set up CUPS queues, and register the GTK3 GUI desktop app:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/9M2PJU/9M2PJU-Canon-PIXMA-GSeries-Tool/main/install.sh | bash
+```
+
+*Or using `wget`:*
+```bash
+wget -qO- https://raw.githubusercontent.com/9M2PJU/9M2PJU-Canon-PIXMA-GSeries-Tool/main/install.sh | bash
+```
+
+---
+
+### Option B: Install from AUR (Arch / CachyOS / Manjaro)
 ```bash
 yay -S canon-pixma-gseries-tool
 # or
 paru -S canon-pixma-gseries-tool
 ```
 
-### Option B: Automated Installer Script (All Distributions)
+---
+
+### Option C: Clone & Run Locally
 ```bash
 git clone https://github.com/9M2PJU/9M2PJU-Canon-PIXMA-GSeries-Tool.git
 cd 9M2PJU-Canon-PIXMA-GSeries-Tool
@@ -177,7 +193,7 @@ chmod +x install.sh bin/canon-pixma-gseries-tool
 ./install.sh
 ```
 
-The installer detects your distribution, installs required dependencies, fixes shared libraries, configures the network route, sets up the CUPS queue, and registers the desktop launcher.
+The installer detects your distribution (Arch, CachyOS, Debian, Ubuntu), installs required dependencies, fixes shared libraries, configures the network route, sets up the CUPS queue, and registers the desktop launcher.
 
 ---
 
