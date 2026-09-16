@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-==============================================================================
-Canon PIXMA G3010 Series Linux Assistant & Maintenance Suite
-Author: 9M2PJU
-Repository: https://github.com/9M2PJU/9M2PJU-Canon-PIXMA-G3010-Linux-Tool
-License: GPL-3.0-or-later
-==============================================================================
+# ==============================================================================
+# Canon PIXMA G3010 Series Linux Tool & Maintenance Suite
+# Author: 9M2PJU
+# Repository: https://github.com/9M2PJU/9M2PJU-Canon-PIXMA-G3010-Tool
+# License: GPL-3.0-or-later
+# ==============================================================================
 """
 
 import sys
@@ -87,7 +87,7 @@ def run_gtk_gui():
 
     class CanonAssistantWindow(Gtk.Window):
         def __init__(self):
-            super().__init__(title="Canon PIXMA G3010 Assistant")
+            super().__init__(title="Canon PIXMA G3010 Tool")
             self.set_default_size(680, 720)
             self.set_position(Gtk.WindowPosition.CENTER)
             self.set_border_width(14)
@@ -95,7 +95,7 @@ def run_gtk_gui():
             # HeaderBar
             hb = Gtk.HeaderBar()
             hb.set_show_close_button(True)
-            hb.props.title = "Canon PIXMA G3010 Assistant"
+            hb.props.title = "Canon PIXMA G3010 Tool"
             hb.props.subtitle = f"{PRINTER} • {PRINTER_IP}"
             self.set_titlebar(hb)
 
@@ -514,7 +514,7 @@ def run_cli_tui():
     while True:
         os.system("clear" if os.name == "posix" else "cls")
         print("==================================================================")
-        print("    Canon PIXMA G3010 - Assistant & Maintenance Suite")
+        print("                 Canon PIXMA G3010 Tool                           ")
         print("==================================================================")
         print(" ⭐ 0) ALL-IN-ONE CONTINUOUS ROUTINE (Runs 1 to 5 sequentially)")
         print("------------------------------------------------------------------")

@@ -1,11 +1,11 @@
-# Canon PIXMA G3010 Linux Driver & Maintenance Suite 🖨️
+# Canon PIXMA G3010 Tool 🖨️
 
 [![AUR package](https://img.shields.io/aur/version/canon-pixma-g3010-tool.svg)](https://aur.archlinux.org/packages/canon-pixma-g3010-tool)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 [![Platform: Linux](https://img.shields.io/badge/Platform-CachyOS%20%7C%20Arch%20%7C%20Ubuntu%20%7C%20Debian%20%7C%20Fedora-orange.svg)]()
 [![Author: 9M2PJU](https://img.shields.io/badge/Author-9M2PJU-green.svg)](https://github.com/9M2PJU)
 
-A Linux driver setup, network routing fix, and interactive maintenance suite for the **Canon PIXMA G3010 Series** (and compatible G-series MegaTank printers: G1000, G1010, G2000, G2010, G3000, G4000, G4010).
+A Linux GTK3 GUI assistant, driver setup, network routing fix, and interactive maintenance suite for the **Canon PIXMA G3010 Series** (and compatible G-series MegaTank printers: G1000, G1010, G2000, G2010, G3000, G4000, G4010).
 
 This suite gives you full feature parity with the official Windows **Canon IJ Printer Assistant Tool**, including automated sequential head cleaning, real-time digital ink telemetry, auto-alignment, paper path cleaning, and hardware error code documentation.
 
@@ -101,7 +101,7 @@ This tool solves all three issues out of the box.
 
 ```text
 ==================================================================
-    Canon PIXMA G3010 - Assistant & Maintenance Utility
+                 Canon PIXMA G3010 Tool
 ==================================================================
  ⭐ 0) ALL-IN-ONE CONTINUOUS ROUTINE (Runs 1 to 5 sequentially)
 ------------------------------------------------------------------
@@ -138,8 +138,8 @@ paru -S canon-pixma-g3010-tool
 
 ### Option B: Automated Installer Script (All Distributions)
 ```bash
-git clone https://github.com/9M2PJU/9M2PJU-Canon-PIXMA-G3010-Linux-Tool.git
-cd 9M2PJU-Canon-PIXMA-G3010-Linux-Tool
+git clone https://github.com/9M2PJU/9M2PJU-Canon-PIXMA-G3010-Tool.git
+cd 9M2PJU-Canon-PIXMA-G3010-Tool
 chmod +x install.sh bin/canon-pixma-g3010-tool
 ./install.sh
 ```
@@ -300,7 +300,7 @@ Ensure your firewall permits local printer traffic:
 To remove the tools, scripts, and CUPS configuration:
 
 ```bash
-cd 9M2PJU-Canon-PIXMA-G3010-Linux-Tool
+cd 9M2PJU-Canon-PIXMA-G3010-Tool
 ./uninstall.sh
 ```
 

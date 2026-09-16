@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# Canon PIXMA G3010 Series Automated Linux Setup & Maintenance Suite Installer
+# Canon PIXMA G3010 Tool - Automated Linux Driver & Assistant Installer
 # Author: 9M2PJU
-# Repository: https://github.com/9M2PJU/9M2PJU-Canon-PIXMA-G3010-Linux-Tool
+# Repository: https://github.com/9M2PJU/9M2PJU-Canon-PIXMA-G3010-Tool
 # ==============================================================================
 
 set -e
@@ -15,7 +15,7 @@ RED='\033[0;31m'
 NC='\033[0m'
 
 echo -e "${BLUE}==================================================================${NC}"
-echo -e "${BLUE}   Canon PIXMA G3010 Linux Tool & Driver Setup by 9M2PJU          ${NC}"
+echo -e "${BLUE}        Canon PIXMA G3010 Tool - Setup by 9M2PJU                  ${NC}"
 echo -e "${BLUE}==================================================================${NC}"
 
 # Check root / sudo
