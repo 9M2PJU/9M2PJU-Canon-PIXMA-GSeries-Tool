@@ -1,5 +1,6 @@
 # Canon PIXMA G3010 Linux Driver & Maintenance Suite 🖨️
 
+[![AUR package](https://img.shields.io/aur/version/canon-pixma-g3010-tools-git.svg)](https://aur.archlinux.org/packages/canon-pixma-g3010-tools-git)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 [![Platform: Linux](https://img.shields.io/badge/Platform-CachyOS%20%7C%20Arch%20%7C%20Ubuntu%20%7C%20Debian%20%7C%20Fedora-orange.svg)]()
 [![Author: 9M2PJU](https://img.shields.io/badge/Author-9M2PJU-green.svg)](https://github.com/9M2PJU)
@@ -128,8 +129,14 @@ This tool solves all three issues out of the box.
 
 ## Quick Installation
 
-Run the automated installer:
+### Option A: Install from AUR (Arch / CachyOS / Manjaro)
+```bash
+yay -S canon-pixma-g3010-tools-git
+# or
+paru -S canon-pixma-g3010-tools-git
+```
 
+### Option B: Automated Installer Script (All Distributions)
 ```bash
 git clone https://github.com/9M2PJU/9M2PJU-Canon-PIXMA-G3010-Linux-Tool.git
 cd 9M2PJU-Canon-PIXMA-G3010-Linux-Tool
