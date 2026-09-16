@@ -1,6 +1,6 @@
 # Canon PIXMA G3010 Series Linux Assistant & Maintenance Suite 🖨️
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 [![Platform: Linux](https://img.shields.io/badge/Platform-Linux%20%7C%20CachyOS%20%7C%20Arch%20%7C%20Ubuntu-orange.svg)]()
 [![Author: 9M2PJU](https://img.shields.io/badge/Author-9M2PJU-green.svg)](https://github.com/9M2PJU)
 
@@ -136,5 +136,5 @@ To remove the maintenance tools and configurations:
 
 ## 📜 License
 
-Released under the [MIT License](LICENSE).  
+Released under the [GNU General Public License v3.0 (GPLv3)](LICENSE).  
 Authored by **[9M2PJU](https://github.com/9M2PJU)**.
