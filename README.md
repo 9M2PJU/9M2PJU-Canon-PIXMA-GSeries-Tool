@@ -45,7 +45,7 @@ This tool solves all three issues out of the box.
 ```
 ┌────────────────────────────────────────────────────────┐
 │              User / Desktop Application                │
-│    (canon-maintenance TUI  |  Rofi / App Launcher)     │
+│ (canon-g3010-maintenance TUI | Rofi / App Launcher)    │
 └───────────┬────────────────────────────────┬───────────┘
             │                                │
             ▼                                ▼
@@ -133,7 +133,7 @@ Run the automated installer:
 ```bash
 git clone https://github.com/9M2PJU/9M2PJU-Canon-PIXMA-G3010-Linux-Tool.git
 cd 9M2PJU-Canon-PIXMA-G3010-Linux-Tool
-chmod +x install.sh bin/canon-maintenance
+chmod +x install.sh bin/canon-g3010-maintenance
 ./install.sh
 ```
 
@@ -181,9 +181,9 @@ sudo lpadmin -d Canon_G3010
 ```bash
 sudo mkdir -p /usr/share/cmdtocanonij2
 sudo cp data/cmdtocanonij2/*.utl /usr/share/cmdtocanonij2/
-sudo cp bin/canon-maintenance /usr/local/bin/canon-maintenance
-sudo chmod +x /usr/local/bin/canon-maintenance
-sudo cp desktop/canon-maintenance.desktop /usr/local/share/applications/
+sudo cp bin/canon-g3010-maintenance /usr/local/bin/canon-g3010-maintenance
+sudo chmod +x /usr/local/bin/canon-g3010-maintenance
+sudo cp desktop/canon-g3010-maintenance.desktop /usr/local/share/applications/
 ```
 
 ---
@@ -192,7 +192,7 @@ sudo cp desktop/canon-maintenance.desktop /usr/local/share/applications/
 
 ### 1. Interactive Terminal App
 ```bash
-canon-maintenance
+canon-g3010-maintenance
 ```
 
 ### 2. Application Launcher

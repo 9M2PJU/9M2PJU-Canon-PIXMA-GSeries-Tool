@@ -1,7 +1,7 @@
 [Desktop Entry]
 Name=Canon PIXMA G3010 Maintenance
 Comment=Assistant & Maintenance Suite for Canon PIXMA G3010
-Exec=kitty --title "Canon Printer Maintenance" canon-maintenance
+Exec=kitty --title "Canon PIXMA G3010 Maintenance" canon-g3010-maintenance
 Icon=printer
 Terminal=false
 Type=Application
