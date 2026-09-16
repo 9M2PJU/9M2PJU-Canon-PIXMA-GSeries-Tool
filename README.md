@@ -15,13 +15,18 @@ This suite gives you full feature parity with the official Windows **Canon IJ Pr
 
 - [Why This Project Exists](#why-this-project-exists)
 - [How It Works](#how-it-works)
+- [Supported Models & Compatibility Matrix](#supported-models--compatibility-matrix)
+  - [Using with Canon PIXMA G3000 Series](#using-with-canon-pixma-g3000-series)
+  - [Full Model Support List](#full-model-support-list)
 - [Features](#features)
 - [Interactive Menu Preview](#interactive-menu-preview)
 - [Quick Installation](#quick-installation)
 - [Manual Setup Guide](#manual-setup-guide)
 - [How to Use](#how-to-use)
 - [Understanding Ink Levels on G-Series Printers](#understanding-ink-levels-on-g-series-printers)
-- [Hardware Button LCD Code Reference](#hardware-button-lcd-code-reference)
+- [Hardware Button & Maintenance Reference](#hardware-button--maintenance-reference)
+  - [1-Digit LCD Models (G3010, G2010, G4010)](#1-digit-lcd-models-g3010-g2010-g4010)
+  - [Non-LCD / Alarm Lamp Flash Models (G3000, G2000, G1000)](#non-lcd--alarm-lamp-flash-models-g3000-g2000-g1000)
 - [Network Troubleshooting](#network-troubleshooting)
 - [Uninstallation](#uninstallation)
 - [License](#license)
@@ -72,6 +77,34 @@ This tool solves all three issues out of the box.
 2. **Network Connection:** Connects directly to the printer over RAW AppSocket (`socket://<IP>:9100`) and IPP (`ipp://<IP>:631/ipp/print`).
 3. **Link-Local Routing:** Ensures NetworkManager retains the `169.254.0.0/16` routing table entry so the printer remains reachable across reboots.
 4. **Maintenance Injection:** Sends raw `#CUPS-COMMAND` control payloads (`Clean all`, `PrintSelfTestPage`, `com.canon.autoalignment`) directly into the CUPS filter chain.
+
+---
+
+## Supported Models & Compatibility Matrix
+
+Can you use this tool with other Canon MegaTank printers besides the **G3010**?
+
+**Yes!** Almost all Canon G-series (MegaTank / Continuous Ink Supply System) printers share identical core raster pipelines, CUPS `#CUPS-COMMAND` control structures (`cmdtocanonij2`), IPP marker telemetry protocols, and print head cartridge families.
+
+### Using with Canon PIXMA G3000 Series
+
+The **Canon PIXMA G3000** (and G2000 / G1000) is the 1st generation predecessor to the G3010.
+* **100% Software Parity:** The GTK3 GUI and CLI tools communicate with the G3000 identically over Wi-Fi (`socket://` & `ipp://`) or USB. 1-click Nozzle Check, Print Head Cleaning, Alignment Sheets, and Real-Time IPP Ink Levels work out-of-the-box without modification.
+* **Physical Hardware Difference:** The G3010 features a 1-digit 7-segment LCD displaying numeric maintenance codes (`1`–`11`). The G3000 lacks an LCD; instead, standalone hardware maintenance on the G3000 is triggered by **counting orange Alarm lamp flashes** while holding the **[Stop]** button (see reference below).
+
+---
+
+### Full Model Support List
+
+| Series / Family | Models Supported | Interface | GUI Clean & IPP Ink | Physical Maintenance |
+| :--- | :--- | :---: | :---: | :--- |
+| **G3010 Series** *(Primary)* | **G3010**, G2010, G1010, G4010<br>`(G3110, G2110, G1110, G3210, G2210, G1210, G3410, G2410, G1410, G3510)` | Wi-Fi / USB | ✅ Full Support | 1-Digit LCD Codes (`1`–`11`) |
+| **G3000 Series** *(1st Gen)* | **G3000**, G2000, G1000, G4000<br>`(G3100, G2100, G1100, G3200, G2200, G1200, G3400, G2400, G1400, G3500)` | Wi-Fi / USB | ✅ Full Support | Alarm LED Flash Count (`1`–`8` flashes) |
+| **G3020 / G3060 Series** *(3rd Gen)* | G1020, G2020, **G3020**, **G3060**, G2060, G1070, G2070, **G3070** | Wi-Fi / USB | ✅ Full Support | 2-Line LCD / On-Screen Menu |
+| **MAXIFY MegaTank** | GM2070, GM4070, GX5070, GX6070, GX7070 | Wi-Fi / USB | ✅ Full Support | Color LCD Touchscreen |
+
+> [!NOTE]
+> When using USB-only models (e.g. G1000, G1010, G2000, G2010), connect via `usb://Canon/G3010%20series` or standard CUPS USB backend URI instead of the network socket IP.
 
 ---
 
@@ -249,9 +282,11 @@ The Canon G3010 is a **MegaTank Continuous Ink Supply System (CISS)**.
 
 ---
 
-## Hardware Button LCD Code Reference
+## Hardware Button & Maintenance Reference
 
-Use these codes for standalone operation directly from the printer panel:
+Use these procedures when operating directly from the physical printer buttons without a computer:
+
+### 1-Digit LCD Models (G3010, G2010, G4010)
 
 | LCD Code | Function | Instructions |
 | :---: | :--- | :--- |
@@ -265,6 +300,24 @@ Use these codes for standalone operation directly from the printer panel:
 | **`8`** | **Ink Counter Reset** | Press `🔧` until `8` &rarr; press `[Black]` (for Black tank) or `[Color]` (for Color tanks). |
 | **`10`** | **Ink Flush (System Purge)** | ⚠️ Verify ink &ge; 50% &rarr; press `🔧` until `10` &rarr; press `[Color]`. (10 minute cycle). |
 | **`11`** | **Print Network Config** | Press `🔧` until `11` &rarr; press `[Black]` or `[Color]` (prints IP, MAC, and Serial Number). |
+
+---
+
+### Non-LCD / Alarm Lamp Flash Models (G3000, G2000, G1000)
+
+On the **Canon PIXMA G3000 Series**, there is no numeric LCD screen. Instead, press and hold the **[Stop / Cancel]** button (red triangle in circle) and count the orange **Alarm Lamp flashes**, then release:
+
+| Alarm Flashes | Function | Procedure |
+| :---: | :--- | :--- |
+| **1 Flash** | **Nozzle Check Pattern** | Hold `[Stop]` until Alarm flashes **1 time** &rarr; release. |
+| **2 Flashes** | **Standard Head Cleaning** | Hold `[Stop]` until Alarm flashes **2 times** &rarr; release. |
+| **3 Flashes** | **Deep Head Cleaning** | Hold `[Stop]` until Alarm flashes **3 times** &rarr; release. |
+| **4 Flashes** | **Print Alignment Sheet** | Hold `[Stop]` until Alarm flashes **4 times** &rarr; release &rarr; place sheet on glass &rarr; press `[Black]` or `[Color]`. |
+| **5 Flashes** | **Ink Flush (System Purge)** | ⚠️ Verify ink &ge; 50% &rarr; Hold `[Stop]` until Alarm flashes **5 times** &rarr; release. |
+| **6 Flashes** | **Print Network Config** | Hold `[Stop]` until Alarm flashes **6 times** &rarr; release (prints Wi-Fi connection report). |
+| **7 Flashes** | **Bottom Plate Cleaning** | Fold 1 A4 sheet widthwise & load &rarr; hold `[Stop]` until Alarm flashes **7 times** &rarr; release. |
+| **8 Flashes** | **Roller Cleaning** | Empty tray &rarr; hold `[Stop]` until Alarm flashes **8 times** &rarr; release &rarr; repeat with 3 plain sheets. |
+| **Hold 5s** | **Ink Counter Reset** | After refilling ink bottles, press and hold `[Stop]` for **5 seconds** &rarr; release. |
 
 ---
 
