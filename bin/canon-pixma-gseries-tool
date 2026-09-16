@@ -122,6 +122,11 @@ def run_gtk_gui():
             hb.props.subtitle = f"{PRINTER} • {PRINTER_IP}"
             self.set_titlebar(hb)
 
+            about_btn = Gtk.Button.new_from_icon_name("help-about-symbolic", Gtk.IconSize.BUTTON)
+            about_btn.set_tooltip_text("About Canon PIXMA G-Series Tool & Author (9M2PJU)")
+            about_btn.connect("clicked", self.show_about_dialog)
+            hb.pack_start(about_btn)
+
             refresh_btn = Gtk.Button.new_from_icon_name("view-refresh-symbolic", Gtk.IconSize.BUTTON)
             refresh_btn.set_tooltip_text("Refresh Ink Levels & Status")
             refresh_btn.connect("clicked", lambda x: self.update_ink_bars())
@@ -488,8 +493,9 @@ def run_gtk_gui():
 
         def show_hardware_codes_dialog(self, widget):
             self.show_info_dialog(
-                "Canon PIXMA G3010 - Hardware Codes Reference",
-                "Press [Setup / 🔧] until the code appears on the LCD, then press [Black] or [Color]:\n\n"
+                "Canon PIXMA G-Series Hardware Codes Reference",
+                "[1-Digit LCD Models: G3010, G2010, G4010]\n"
+                "Press [Setup / 🔧] until the code appears, then press [Black] or [Color]:\n"
                 "  Code 1   : Nozzle Check Pattern\n"
                 "  Code 2   : Standard Head Cleaning\n"
                 "  Code 3   : Deep Head Cleaning\n"
@@ -499,8 +505,38 @@ def run_gtk_gui():
                 "  Code 7   : Bottom Plate Cleaning\n"
                 "  Code 8   : Remaining Ink Counter Reset\n"
                 "  Code 10  : Ink Flush (Full ink purge/recharge)\n"
-                "  Code 11  : Print Wireless LAN Configuration Sheet"
+                "  Code 11  : Print Wireless LAN Configuration Sheet\n\n"
+                "[Non-LCD Models: G3000, G2000, G1000]\n"
+                "Hold [Stop] until the orange Alarm lamp flashes X times, then release:\n"
+                "  1 Flash  : Nozzle Check Pattern\n"
+                "  2 Flashes: Standard Head Cleaning\n"
+                "  3 Flashes: Deep Head Cleaning\n"
+                "  4 Flashes: Print Alignment Pattern Sheet\n"
+                "  5 Flashes: Ink Flush (Full ink purge)\n"
+                "  6 Flashes: Print Network Configuration Sheet\n"
+                "  7 Flashes: Bottom Plate Cleaning\n"
+                "  8 Flashes: Paper Feed Roller Cleaning\n"
+                "  Hold 5s  : Remaining Ink Counter Reset"
             )
+
+        def show_about_dialog(self, widget=None):
+            about = Gtk.AboutDialog()
+            about.set_transient_for(self)
+            about.set_modal(True)
+            about.set_program_name("Canon PIXMA G-Series Tool")
+            about.set_version("1.0.0")
+            about.set_copyright("Copyright © 2026 9M2PJU <9m2pju@gmail.com>")
+            about.set_comments(
+                "Linux GTK3 Assistant, IPP Ink Telemetry, Driver Setup, and Maintenance Suite "
+                "for Canon PIXMA G-Series MegaTank Printers (G1000, G1010, G2000, G2010, G3000, G3010, G3020, G3060, G4000, G4010)."
+            )
+            about.set_website("https://github.com/9M2PJU/9M2PJU-Canon-PIXMA-GSeries-Tool")
+            about.set_website_label("GitHub: 9M2PJU/9M2PJU-Canon-PIXMA-GSeries-Tool")
+            about.set_authors(["9M2PJU <9m2pju@gmail.com>"])
+            about.set_license_type(Gtk.License.GPL_3_0)
+            about.set_logo_icon_name("printer")
+            about.connect("response", lambda d, r: d.destroy())
+            about.show()
 
     win = CanonAssistantWindow()
     win.connect("destroy", Gtk.main_quit)
@@ -534,69 +570,80 @@ def run_cli_tui():
         sys.stdout.write(f"\r   {msg} [Finished]            \n")
         sys.stdout.flush()
 
+    def prompt_return(msg="Press Enter to return..."):
+        try:
+            input(msg)
+        except (EOFError, KeyboardInterrupt):
+            pass
+
     while True:
-        os.system("clear" if os.name == "posix" else "cls")
-        print("==================================================================")
-        print("                Canon PIXMA G-Series Tool                         ")
-        print("==================================================================")
-        print(" ⭐ 0) ALL-IN-ONE CONTINUOUS ROUTINE (Runs 1 to 5 sequentially)")
-        print("------------------------------------------------------------------")
-        print(" [Print Head & Ink Maintenance]")
-        print("  1) Nozzle Check Pattern           (Checks for clogged nozzles)")
-        print("  2) Cleaning                       (Standard print head cleaning)")
-        print("  3) Deep Cleaning                  (Cleans stubborn clogs)")
-        print("  4) Ink Flush                      (Purges tubes & fills heads)")
-        print("  5) Print Head Alignment           (Corrects misalignment & lines)")
-        print("  6) Remaining Ink Levels & Reset   (Live IPP check & reset guide)")
-        print("")
-        print(" [Paper & Mechanical Cleaning]")
-        print("  7) Roller Cleaning                (Cleans paper feed rollers)")
-        print("  8) Bottom Plate Cleaning          (Cleans interior paper smudges)")
-        print("")
-        print(" [Device Management & Settings]")
-        print("  9) Printer Web Remote UI          (Quiet mode, Auto-power, Ink stats)")
-        print(" 10) CUPS Printer Status            (http://localhost:631)")
-        print(" 11) Complete Hardware Codes Reference")
-        print("  q) Quit")
-        print("==================================================================")
-        choice = input("Select an option [0-11, q]: ").strip()
+        try:
+            os.system("clear" if os.name == "posix" else "cls")
+            print("==================================================================")
+            print("                Canon PIXMA G-Series Tool                         ")
+            print("==================================================================")
+            print(" ⭐ 0) ALL-IN-ONE CONTINUOUS ROUTINE (Runs 1 to 5 sequentially)")
+            print("------------------------------------------------------------------")
+            print(" [Print Head & Ink Maintenance]")
+            print("  1) Nozzle Check Pattern           (Checks for clogged nozzles)")
+            print("  2) Cleaning                       (Standard print head cleaning)")
+            print("  3) Deep Cleaning                  (Cleans stubborn clogs)")
+            print("  4) Ink Flush                      (Purges tubes & fills heads)")
+            print("  5) Print Head Alignment           (Corrects misalignment & lines)")
+            print("  6) Remaining Ink Levels & Reset   (Live IPP check & reset guide)")
+            print("")
+            print(" [Paper & Mechanical Cleaning]")
+            print("  7) Roller Cleaning                (Cleans paper feed rollers)")
+            print("  8) Bottom Plate Cleaning          (Cleans interior paper smudges)")
+            print("")
+            print(" [Device Management & Settings]")
+            print("  9) Printer Web Remote UI          (Quiet mode, Auto-power, Ink stats)")
+            print(" 10) CUPS Printer Status            (http://localhost:631)")
+            print(" 11) Complete Hardware Codes Reference")
+            print(" 12) About & Author Information     (9M2PJU, GitHub, License)")
+            print("  q) Quit")
+            print("==================================================================")
+            choice = input("Select an option [0-12, q]: ").strip()
+        except (EOFError, KeyboardInterrupt):
+            print("\nExiting...")
+            break
 
         if choice == "0":
             print("\n==> [1/4] Printing Baseline Nozzle Check...")
             send_lp_command("nozzlecheck.utl")
             wait_for_idle_cli(30)
-            input("Press Enter to proceed to Head Cleaning...")
+            prompt_return("Press Enter to proceed to Head Cleaning...")
             print("\n==> [2/4] Executing Head Cleaning...")
             send_lp_command("cleaning.utl")
             countdown_cli(60, "Purging nozzles")
-            input("Press Enter to proceed to Verification Check...")
+            prompt_return("Press Enter to proceed to Verification Check...")
             print("\n==> [3/4] Printing Verification Nozzle Check...")
             send_lp_command("nozzlecheck.utl")
             wait_for_idle_cli(30)
-            input("Press Enter to proceed to Alignment...")
+            prompt_return("Press Enter to proceed to Alignment...")
             print("\n==> [4/4] Printing Alignment Sheet...")
             send_lp_command("autoalign.utl")
             print("Alignment sheet sent. Place face-down on glass and press 🔧 until Code 5 appears.")
-            input("Press Enter to return to menu...")
+            prompt_return("Press Enter to return to menu...")
         elif choice == "1":
             print(f"\n>> Sending Nozzle Check to {PRINTER}...")
             send_lp_command("nozzlecheck.utl")
-            input("Done. Press Enter to continue...")
+            prompt_return("Done. Press Enter to continue...")
         elif choice == "2":
             print(f"\n>> Sending Head Cleaning to {PRINTER}...")
             send_lp_command("cleaning.utl")
             countdown_cli(60, "Cleaning print heads")
-            input("Done. Press Enter to continue...")
+            prompt_return("Done. Press Enter to continue...")
         elif choice == "3":
             print("\nDeep Cleaning Guide: Press [Setup / 🔧] until Code 3 appears, then press [Black] or [Color].")
-            input("Press Enter to return...")
+            prompt_return("Press Enter to return...")
         elif choice == "4":
             print("\nInk Flush Guide: Ensure tanks >= 50%. Press [Setup / 🔧] until Code 10 appears, then press [Color].")
-            input("Press Enter to return...")
+            prompt_return("Press Enter to return...")
         elif choice == "5":
             send_lp_command("autoalign.utl")
             print("\nAlignment sheet sent. Put on glass & press [Setup / 🔧] until Code 5 appears.")
-            input("Press Enter to return...")
+            prompt_return("Press Enter to return...")
         elif choice == "6":
             print("\n--- LIVE IPP INK STATUS ---")
             levels = query_ink_levels()
@@ -606,20 +653,59 @@ def run_cli_tui():
                 bar = '█' * (v // 5) + '░' * ((100 - v) // 5)
                 print(f"  {label}: [{bar}] {v}%")
             print("\nReset ink counter after refill: Hold [Stop] button for 5s.")
-            input("Press Enter to return...")
+            prompt_return("Press Enter to return...")
         elif choice == "7":
             print("\nRoller Cleaning: Empty tray -> Press 🔧 until Code 6 -> Press Color -> Load 3 sheets -> Press Color.")
-            input("Press Enter to return...")
+            prompt_return("Press Enter to return...")
         elif choice == "8":
             print("\nBottom Plate Cleaning: Fold 1 A4 sheet widthwise, unfold -> Load in tray -> Press 🔧 until Code 7 -> Press Color.")
-            input("Press Enter to return...")
+            prompt_return("Press Enter to return...")
         elif choice == "9":
             subprocess.Popen(["xdg-open", PRINTER_WEB_URL])
         elif choice == "10":
             subprocess.Popen(["xdg-open", CUPS_WEB_URL])
         elif choice == "11":
-            print("\nHardware Codes: 1=NozzleCheck, 2=Clean, 3=DeepClean, 4=AlignSheet, 5=ScanAlign, 6=Rollers, 7=BottomPlate, 8=ResetInk, 10=Flush, 11=NetConfig")
-            input("Press Enter to return...")
+            print("\n==================================================================")
+            print("       Canon PIXMA G-Series Hardware Codes Reference              ")
+            print("==================================================================")
+            print(" [1-Digit LCD Models: G3010, G2010, G4010]")
+            print("  Press [Setup / 🔧] until the code appears, then press [Black] or [Color]:")
+            print("   Code 1  : Nozzle Check Pattern")
+            print("   Code 2  : Standard Head Cleaning")
+            print("   Code 3  : Deep Head Cleaning")
+            print("   Code 4  : Print Alignment Pattern Sheet")
+            print("   Code 5  : Scan Alignment Sheet (Calibration)")
+            print("   Code 6  : Paper Feed Roller Cleaning")
+            print("   Code 7  : Bottom Plate Cleaning")
+            print("   Code 8  : Remaining Ink Counter Reset")
+            print("   Code 10 : Ink Flush (Full ink purge/recharge)")
+            print("   Code 11 : Print Wireless LAN Configuration Sheet\n")
+            print(" [Non-LCD Models: G3000, G2000, G1000]")
+            print("  Hold [Stop] until Alarm lamp flashes X times, then release:")
+            print("   1 Flash : Nozzle Check Pattern")
+            print("   2 Flashes: Standard Head Cleaning")
+            print("   3 Flashes: Deep Head Cleaning")
+            print("   4 Flashes: Print Alignment Pattern Sheet")
+            print("   5 Flashes: Ink Flush (Full ink purge)")
+            print("   6 Flashes: Print Network Configuration Sheet")
+            print("   7 Flashes: Bottom Plate Cleaning")
+            print("   8 Flashes: Paper Feed Roller Cleaning")
+            print("   Hold 5s : Remaining Ink Counter Reset")
+            print("==================================================================")
+            prompt_return("Press Enter to return...")
+        elif choice == "12":
+            print("\n==================================================================")
+            print("            About Canon PIXMA G-Series Tool                       ")
+            print("==================================================================")
+            print("  • Author:        9M2PJU <9m2pju@gmail.com>")
+            print("  • Version:       1.0.0")
+            print("  • License:       GNU General Public License v3.0 (GPL-3.0-or-later)")
+            print("  • GitHub Repo:   https://github.com/9M2PJU/9M2PJU-Canon-PIXMA-GSeries-Tool")
+            print("  • Target Device: Canon PIXMA G-Series (G1000–G4010, G3000, G3010, G3020)")
+            print("  • Description:   Linux GTK3 GUI assistant, IPP live ink telemetry,")
+            print("                   CUPS command filter injection, and maintenance suite.")
+            print("==================================================================")
+            prompt_return("Press Enter to return...")
         elif choice.lower() == "q":
             break
 
