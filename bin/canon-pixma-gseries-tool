@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
 # ==============================================================================
-# Canon PIXMA G3010 Series Linux Tool & Maintenance Suite
+# Canon PIXMA G-Series Linux Tool & Maintenance Suite
 # Author: 9M2PJU
-# Repository: https://github.com/9M2PJU/9M2PJU-Canon-PIXMA-G3010-Tool
+# Repository: https://github.com/9M2PJU/9M2PJU-Canon-PIXMA-GSeries-Tool
 # License: GPL-3.0-or-later
 # ==============================================================================
 """
@@ -15,7 +15,30 @@ import threading
 import time
 import shutil
 
-PRINTER = os.environ.get("CANON_PRINTER_NAME", "Canon_G3010")
+def detect_canon_printer():
+    if "CANON_PRINTER_NAME" in os.environ:
+        return os.environ["CANON_PRINTER_NAME"]
+    try:
+        res = subprocess.run(["lpstat", "-d"], capture_output=True, text=True, timeout=2)
+        for line in res.stdout.splitlines():
+            if "system default destination:" in line:
+                name = line.split(":", 1)[1].strip()
+                if name:
+                    return name
+    except Exception:
+        pass
+    try:
+        res = subprocess.run(["lpstat", "-p"], capture_output=True, text=True, timeout=2)
+        for line in res.stdout.splitlines():
+            if line.startswith("printer "):
+                name = line.split()[1]
+                if "canon" in name.lower() or "g30" in name.lower() or "g20" in name.lower() or "g10" in name.lower():
+                    return name
+    except Exception:
+        pass
+    return "Canon_G3010"
+
+PRINTER = detect_canon_printer()
 PRINTER_IP = os.environ.get("CANON_PRINTER_IP", "169.254.108.236")
 PRINTER_WEB_URL = f"http://{PRINTER_IP}"
 CUPS_WEB_URL = f"http://localhost:631/printers/{PRINTER}"
@@ -87,7 +110,7 @@ def run_gtk_gui():
 
     class CanonAssistantWindow(Gtk.Window):
         def __init__(self):
-            super().__init__(title="Canon PIXMA G3010 Tool")
+            super().__init__(title="Canon PIXMA G-Series Tool")
             self.set_default_size(680, 720)
             self.set_position(Gtk.WindowPosition.CENTER)
             self.set_border_width(14)
@@ -95,7 +118,7 @@ def run_gtk_gui():
             # HeaderBar
             hb = Gtk.HeaderBar()
             hb.set_show_close_button(True)
-            hb.props.title = "Canon PIXMA G3010 Tool"
+            hb.props.title = "Canon PIXMA G-Series Tool"
             hb.props.subtitle = f"{PRINTER} • {PRINTER_IP}"
             self.set_titlebar(hb)
 
@@ -514,7 +537,7 @@ def run_cli_tui():
     while True:
         os.system("clear" if os.name == "posix" else "cls")
         print("==================================================================")
-        print("                 Canon PIXMA G3010 Tool                           ")
+        print("                Canon PIXMA G-Series Tool                         ")
         print("==================================================================")
         print(" ⭐ 0) ALL-IN-ONE CONTINUOUS ROUTINE (Runs 1 to 5 sequentially)")
         print("------------------------------------------------------------------")

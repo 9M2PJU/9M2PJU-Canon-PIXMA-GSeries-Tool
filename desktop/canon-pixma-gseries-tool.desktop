@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Canon PIXMA G-Series Tool
+Comment=GUI Assistant & Maintenance Suite for Canon PIXMA G-Series MegaTank Printers
+Exec=canon-pixma-gseries-tool
+Icon=printer
+Terminal=false
+Type=Application
+Categories=Utility;Printing;HardwareSettings;GTK;
+Keywords=printer;canon;pixma;gseries;g3000;g3010;g3020;g2010;g1010;ink;cleaning;nozzle;align;gui;tool;

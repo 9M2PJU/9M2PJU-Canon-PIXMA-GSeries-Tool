@@ -1,11 +1,11 @@
-# Canon PIXMA G3010 Tool 🖨️
+# Canon PIXMA G-Series Tool 🖨️
 
-[![AUR package](https://img.shields.io/aur/version/canon-pixma-g3010-tool.svg)](https://aur.archlinux.org/packages/canon-pixma-g3010-tool)
+[![AUR package](https://img.shields.io/aur/version/canon-pixma-gseries-tool.svg)](https://aur.archlinux.org/packages/canon-pixma-gseries-tool)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 [![Platform: Linux](https://img.shields.io/badge/Platform-CachyOS%20%7C%20Arch%20%7C%20Ubuntu%20%7C%20Debian%20%7C%20Fedora-orange.svg)]()
 [![Author: 9M2PJU](https://img.shields.io/badge/Author-9M2PJU-green.svg)](https://github.com/9M2PJU)
 
-A Linux GTK3 GUI assistant, driver setup, network routing fix, and interactive maintenance suite for the **Canon PIXMA G3010 Series** (and compatible G-series MegaTank printers: G1000, G1010, G2000, G2010, G3000, G4000, G4010).
+A Linux GTK3 GUI assistant, driver setup, network routing fix, and interactive maintenance suite for **Canon PIXMA G-Series MegaTank Printers** (G1000, G1010, G2000, G2010, G3000, G3010, G3020, G3060, G4000, G4010, and regional variants).
 
 This suite gives you full feature parity with the official Windows **Canon IJ Printer Assistant Tool**, including automated sequential head cleaning, real-time digital ink telemetry, auto-alignment, paper path cleaning, and hardware error code documentation.
 
@@ -51,7 +51,7 @@ This tool solves all three issues out of the box.
 ```
 ┌────────────────────────────────────────────────────────┐
 │              User / Desktop Application                │
-│   (canon-pixma-g3010-tool GUI / CLI | App Launcher)    │
+│   (canon-pixma-gseries-tool GUI / CLI | App Launcher)  │
 └───────────┬────────────────────────────────┬───────────┘
             │                                │
             ▼                                ▼
@@ -134,7 +134,7 @@ The **Canon PIXMA G3000** (and G2000 / G1000) is the 1st generation predecessor 
 
 ```text
 ==================================================================
-                 Canon PIXMA G3010 Tool
+                Canon PIXMA G-Series Tool
 ==================================================================
  ⭐ 0) ALL-IN-ONE CONTINUOUS ROUTINE (Runs 1 to 5 sequentially)
 ------------------------------------------------------------------
@@ -164,16 +164,16 @@ The **Canon PIXMA G3000** (and G2000 / G1000) is the 1st generation predecessor 
 
 ### Option A: Install from AUR (Arch / CachyOS / Manjaro)
 ```bash
-yay -S canon-pixma-g3010-tool
+yay -S canon-pixma-gseries-tool
 # or
-paru -S canon-pixma-g3010-tool
+paru -S canon-pixma-gseries-tool
 ```
 
 ### Option B: Automated Installer Script (All Distributions)
 ```bash
-git clone https://github.com/9M2PJU/9M2PJU-Canon-PIXMA-G3010-Tool.git
-cd 9M2PJU-Canon-PIXMA-G3010-Tool
-chmod +x install.sh bin/canon-pixma-g3010-tool
+git clone https://github.com/9M2PJU/9M2PJU-Canon-PIXMA-GSeries-Tool.git
+cd 9M2PJU-Canon-PIXMA-GSeries-Tool
+chmod +x install.sh bin/canon-pixma-gseries-tool
 ./install.sh
 ```
 
@@ -221,9 +221,10 @@ sudo lpadmin -d Canon_G3010
 ```bash
 sudo mkdir -p /usr/share/cmdtocanonij2
 sudo cp data/cmdtocanonij2/*.utl /usr/share/cmdtocanonij2/
-sudo cp bin/canon-pixma-g3010-tool /usr/local/bin/canon-pixma-g3010-tool
-sudo chmod +x /usr/local/bin/canon-pixma-g3010-tool
-sudo cp desktop/canon-pixma-g3010-tool.desktop /usr/local/share/applications/
+sudo cp bin/canon-pixma-gseries-tool /usr/local/bin/canon-pixma-gseries-tool
+sudo chmod +x /usr/local/bin/canon-pixma-gseries-tool
+sudo ln -sf canon-pixma-gseries-tool /usr/local/bin/canon-pixma-g3010-tool
+sudo cp desktop/canon-pixma-gseries-tool.desktop /usr/local/share/applications/
 ```
 
 ---
@@ -233,14 +234,14 @@ sudo cp desktop/canon-pixma-g3010-tool.desktop /usr/local/share/applications/
 ### 1. Graphical User Interface (Default GUI)
 Launch the native GTK3 graphical assistant:
 ```bash
-canon-pixma-g3010-tool
+canon-pixma-gseries-tool
 ```
-* Or search for **Canon PIXMA G3010 Tool** in your desktop application launcher / Rofi / Wofi.
+* Or search for **Canon PIXMA G-Series Tool** in your desktop application launcher / Rofi / Wofi.
 
 ### 2. Terminal TUI Mode (Headless / SSH)
 If you prefer running inside the terminal or over SSH:
 ```bash
-canon-pixma-g3010-tool --cli
+canon-pixma-gseries-tool --cli
 ```
 
 ### 3. Direct Command Line Invocations
@@ -353,7 +354,7 @@ Ensure your firewall permits local printer traffic:
 To remove the tools, scripts, and CUPS configuration:
 
 ```bash
-cd 9M2PJU-Canon-PIXMA-G3010-Tool
+cd 9M2PJU-Canon-PIXMA-GSeries-Tool
 ./uninstall.sh
 ```
 
